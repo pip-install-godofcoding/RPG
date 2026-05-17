@@ -73,11 +73,12 @@ export class ClassSelectScene extends Phaser.Scene {
         this.add.text(cx - cardW / 2 + 15, sy, s.label, {
           fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#888899'
         });
+        const barStartX = cx - cardW / 2 + 50;
         const barW = 120;
-        this.add.rectangle(cx + 20, sy + 5, barW, 8, 0x1a1a2e).setOrigin(0, 0.5);
+        this.add.rectangle(barStartX, sy + 5, barW, 8, 0x1a1a2e).setOrigin(0, 0.5);
         const fill = (s.value / s.max) * barW;
-        this.add.rectangle(cx + 20, sy + 5, fill, 8, s.color, 0.8).setOrigin(0, 0.5);
-        this.add.text(cx + 20 + barW + 8, sy, `${s.value}`, {
+        this.add.rectangle(barStartX, sy + 5, fill, 8, s.color, 0.8).setOrigin(0, 0.5);
+        this.add.text(barStartX + barW + 6, sy, `${s.value}`, {
           fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#aaaaaa'
         });
       });

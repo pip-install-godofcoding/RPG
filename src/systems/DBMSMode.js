@@ -32,6 +32,7 @@ export class DBMSMode {
     this.queryLog = [];
     this.conceptsSeen = new Set();
     this.currentPanel = null;
+    this.expandedModal = null;
     this.supabase = null;
 
     if (!this.active) return;
@@ -64,7 +65,7 @@ export class DBMSMode {
     }
   }
 
-  async _executeReal(sql, params) {
+  async _executeReal(sql, _params) {
     if (!this.supabase) return null;
     try {
       const { data, error } = await this.supabase.rpc('exec_sql', { query: sql });
@@ -106,7 +107,7 @@ export class DBMSMode {
   }
 
   // ─── LOG A QUERY (with concept tag, syntax coloring) ─────
-  _addLog(type, sql, color, concept) {
+  _addLog(type, sql, _color, concept) {
     const s = this.scene;
     const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
@@ -118,7 +119,7 @@ export class DBMSMode {
 
     // Reposition existing entries up
     const entryH = 95;
-    this.queryEntries.forEach((entry, i) => {
+    this.queryEntries.forEach(entry => {
       entry.forEach(e => { e.y -= entryH; });
     });
 
@@ -137,12 +138,19 @@ export class DBMSMode {
     // Background for this entry
     const entryBg = s.add.rectangle(175, baseY, 320, entryH - 6, 0x12121f, 0.8)
       .setStrokeStyle(1, Phaser.Display.Color.HexStringToColor(badgeColor).color, 0.4)
-      .setDepth(296).setScrollFactor(0);
+      .setDepth(296).setScrollFactor(0).setInteractive({ useHandCursor: true });
+    entryBg.on('pointerover', () => {
+      entryBg.setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(badgeColor).color, 1);
+    });
+    entryBg.on('pointerout', () => {
+      entryBg.setStrokeStyle(1, Phaser.Display.Color.HexStringToColor(badgeColor).color, 0.4);
+    });
+    entryBg.on('pointerdown', () => this._showExpanded(type, sql, badgeColor, concept, time));
     els.push(entryBg);
 
     // Type + timestamp header
     const header = s.add.text(22, baseY - 38, `[${type}]  ${time}`, {
-      fontFamily: '"Press Start 2P"', fontSize: '6px', color: badgeColor
+      fontFamily: '"Press Start 2P"', fontSize: '7px', color: badgeColor
     }).setDepth(297).setScrollFactor(0);
     els.push(header);
 
@@ -156,17 +164,20 @@ export class DBMSMode {
 
     // SQL text (the main content — large and readable)
     const sqlText = s.add.text(26, baseY - 24, sql, {
-      fontFamily: 'monospace', fontSize: '9px', color: '#33ee55',
-      wordWrap: { width: 305 }, lineSpacing: 2
+      fontFamily: '"Courier New", monospace', fontSize: '9px', color: '#44ee66',
+      wordWrap: { width: 295 }, lineSpacing: 2
     }).setDepth(297).setScrollFactor(0);
     els.push(sqlText);
 
     // Result indicator
     const isReal = this.supabase !== null;
-    const indicator = s.add.text(320, baseY + 32, isReal ? '✅ EXECUTED' : '📝 SIMULATED', {
-      fontFamily: '"Press Start 2P"', fontSize: '4px', color: isReal ? '#44ff44' : '#666677'
+    const indicator = s.add.text(24, baseY + 32, isReal ? '✅ EXECUTED' : '📝 SIMULATED', {
+      fontFamily: '"Press Start 2P"', fontSize: '5px', color: isReal ? '#44ff44' : '#666677'
+    }).setDepth(297).setScrollFactor(0);
+    const expandHint = s.add.text(320, baseY + 32, '▸ expand', {
+      fontFamily: '"Courier New", monospace', fontSize: '9px', color: '#445566'
     }).setOrigin(1, 0).setDepth(297).setScrollFactor(0);
-    els.push(indicator);
+    els.push(indicator, expandHint);
 
     this.queryEntries.push(els);
 
@@ -303,41 +314,144 @@ export class DBMSMode {
   _showSchema() {
     this.currentPanel = 'schema';
     const s = this.scene, cx = 640, cy = 360;
+    const PX = '"Press Start 2P"';
+    const D  = 1000;
 
-    const bg = s.add.rectangle(cx, cy, 800, 550, 0x08080f, 0.97)
-      .setStrokeStyle(2, 0xff8800, 0.8).setDepth(400).setScrollFactor(0);
-    const t = s.add.text(cx, 100, '🗄  DATABASE SCHEMA — 3rd Normal Form', {
-      fontFamily: '"Press Start 2P"', fontSize: '10px', color: '#ff8800'
-    }).setOrigin(0.5).setDepth(401).setScrollFactor(0);
-    const cl = s.add.text(1010, 100, '[TAB] Close', {
-      fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#666'
-    }).setOrigin(1, 0.5).setDepth(401).setScrollFactor(0);
-    this.elements.push(bg, t, cl);
+    // Full-screen cover — sits above every HUD layer
+    const dim = s.add.rectangle(cx, cy, 1280, 720, 0x000000, 0.92).setDepth(D - 1).setScrollFactor(0);
+    const bg  = s.add.rectangle(cx, cy, 1250, 708, 0x0a0a14, 1)
+      .setStrokeStyle(3, 0xff8800, 1).setDepth(D).setScrollFactor(0);
+
+    // Title keeps the game font (it's big enough to look good)
+    const title = s.add.text(cx, 32, 'DATABASE SCHEMA  —  3rd Normal Form', {
+      fontFamily: PX, fontSize: '13px', color: '#ff9900',
+      stroke: '#0a0005', strokeThickness: 4
+    }).setOrigin(0.5).setDepth(D + 1).setScrollFactor(0);
+
+    const closeBtn = s.add.text(1240, 32, '[TAB] Close', {
+      fontFamily: PX, fontSize: '8px', color: '#886633'
+    }).setOrigin(1, 0.5).setDepth(D + 1).setScrollFactor(0);
+
+    const divTop = s.add.rectangle(cx, 56, 1230, 2, 0xff8800, 0.5).setDepth(D + 1).setScrollFactor(0);
+    this.elements.push(dim, bg, title, closeBtn, divTop);
 
     const tables = [
-      { n: 'players', pk: 'player_id UUID', fk: 'guild_id → guilds', cols: 'username UNIQUE, class, level, xp, hp, max_hp, mana, gold, position_x, position_y, current_zone, is_online', nf: '3NF', note: 'No partial or transitive dependencies. guild_id is a FK, not a repeated group.' },
-      { n: 'item_types', pk: 'type_id SERIAL', fk: '—', cols: 'type_name (weapon | armor | potion | quest)', nf: '1NF', note: 'Lookup table — stores each type string ONCE. Items reference by FK.' },
-      { n: 'items', pk: 'item_id UUID', fk: 'type_id → item_types, rarity_id → rarity', cols: 'name, attack_bonus, defense_bonus, sell_price, lore_text', nf: '3NF', note: 'type & rarity extracted into separate tables to eliminate transitive deps.' },
-      { n: 'inventory', pk: 'inv_id UUID', fk: 'player_id → players, item_id → items', cols: 'quantity, equipped BOOL, slot', nf: '3NF', note: 'Junction table: resolves M:N between players ↔ items.' },
-      { n: 'guilds', pk: 'guild_id UUID', fk: '—', cols: 'guild_name UNIQUE, guild_tag, level, gold_bank, max_members', nf: '3NF', note: 'Independent entity. Players reference via FK.' },
-      { n: 'battle_log', pk: 'log_id UUID', fk: 'attacker_id → players, defender_id → players', cols: 'damage, skill_used, is_critical, timestamp, zone', nf: 'Audit', note: 'Append-only log. Supports aggregate queries (COUNT, AVG damage).' },
-      { n: 'player_quests', pk: 'player_id + quest_id', fk: 'player_id → players, quest_id → quests', cols: 'status, progress JSONB, started_at, completed_at', nf: '3NF', note: 'Composite PK junction table for M:N players ↔ quests.' }
+      { n: 'players',       pk: 'player_id UUID',      fk: 'guild_id → guilds',                             cols: 'username, class, level, xp, hp, max_hp, mana, gold, position_x, position_y, current_zone, is_online', nf: '3NF',   note: 'No partial/transitive deps.\nguild_id is FK, not repeated.' },
+      { n: 'item_types',    pk: 'type_id SERIAL',      fk: '—',                                             cols: 'type_name  (weapon | armor | potion | quest)',                                                          nf: '1NF',   note: 'Lookup table — each type\nstored ONCE, items ref by FK.' },
+      { n: 'items',         pk: 'item_id UUID',         fk: 'type_id → item_types,  rarity_id → rarity',    cols: 'name, attack_bonus, defense_bonus, sell_price, lore_text',                                             nf: '3NF',   note: 'type & rarity moved out\nto remove transitive deps.' },
+      { n: 'inventory',     pk: 'inv_id UUID',          fk: 'player_id → players,  item_id → items',        cols: 'quantity, equipped BOOL, slot',                                                                        nf: '3NF',   note: 'Junction table: resolves\nM:N players ↔ items.' },
+      { n: 'guilds',        pk: 'guild_id UUID',        fk: '—',                                             cols: 'guild_name, guild_tag, level, gold_bank, max_members',                                                nf: '3NF',   note: 'Independent entity.\nPlayers ref via FK.' },
+      { n: 'battle_log',    pk: 'log_id UUID',          fk: 'attacker_id → players,  defender_id → players', cols: 'damage, skill_used, is_critical, timestamp, zone',                                                   nf: 'Audit', note: 'Append-only log.\nSupports COUNT / AVG queries.' },
+      { n: 'player_quests', pk: 'player_id + quest_id', fk: 'player_id → players,  quest_id → quests',      cols: 'status, progress JSONB, started_at, completed_at',                                                    nf: '3NF',   note: 'Composite PK junction.\nM:N players ↔ quests.' }
     ];
 
+    const ROW = 86, LEFT = 30, RIGHT = 1240;
     tables.forEach((tb, i) => {
-      const y = 128 + i * 56;
-      const nm = s.add.text(260, y, `📋 ${tb.n}`, { fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#ffaa44' }).setDepth(401).setScrollFactor(0);
-      const pk = s.add.text(260, y + 12, `PK: ${tb.pk}  |  FK: ${tb.fk}`, { fontFamily: 'monospace', fontSize: '7px', color: '#88aacc' }).setDepth(401).setScrollFactor(0);
-      const co = s.add.text(260, y + 24, tb.cols, { fontFamily: 'monospace', fontSize: '7px', color: '#55cc66', wordWrap: { width: 530 } }).setDepth(401).setScrollFactor(0);
-      const nf = s.add.text(1010, y, tb.nf + ' ✓', { fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#ffdd44' }).setOrigin(1, 0).setDepth(401).setScrollFactor(0);
-      const nt = s.add.text(1010, y + 14, tb.note, { fontFamily: 'Inter', fontSize: '8px', color: '#777788', wordWrap: { width: 200 } }).setOrigin(1, 0).setDepth(401).setScrollFactor(0);
-      this.elements.push(nm, pk, co, nf, nt);
+      const y = 65 + i * ROW;
+      const shade = (i % 2 === 0) ? 0x0e0e1c : 0x0a0a12;
+      const rowBg = s.add.rectangle(cx, y + ROW / 2, 1230, ROW - 1, shade).setDepth(D).setScrollFactor(0);
+
+      // Table name — Press Start 2P (big enough to look good)
+      const nm = s.add.text(LEFT, y + 8, tb.n, {
+        fontFamily: PX, fontSize: '10px', color: '#ffcc44',
+        stroke: '#000', strokeThickness: 2
+      }).setDepth(D + 1).setScrollFactor(0);
+
+      // PK / FK — plain Arial Bold, crisp and readable
+      const pk = s.add.text(LEFT, y + 30, `PK: ${tb.pk}`, {
+        fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+        fontSize: '13px', color: '#77bbff'
+      }).setDepth(D + 1).setScrollFactor(0);
+
+      const fk = s.add.text(LEFT + 330, y + 30, `FK: ${tb.fk}`, {
+        fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
+        fontSize: '13px', color: '#ffaa66'
+      }).setDepth(D + 1).setScrollFactor(0);
+
+      // Columns — Arial regular, slightly smaller
+      const co = s.add.text(LEFT, y + 54, tb.cols, {
+        fontFamily: 'Arial, sans-serif', fontSize: '12px', color: '#44dd66',
+        wordWrap: { width: 830 }
+      }).setDepth(D + 1).setScrollFactor(0);
+
+      // NF badge keeps pixel font (short word, looks intentional)
+      const nf = s.add.text(RIGHT, y + 8, tb.nf, {
+        fontFamily: PX, fontSize: '9px', color: '#ffee33'
+      }).setOrigin(1, 0).setDepth(D + 1).setScrollFactor(0);
+
+      // Notes — Arial, right-aligned
+      const nt = s.add.text(RIGHT, y + 30, tb.note, {
+        fontFamily: 'Arial, sans-serif', fontSize: '12px', color: '#aaaacc',
+        wordWrap: { width: 240 }, align: 'right'
+      }).setOrigin(1, 0).setDepth(D + 1).setScrollFactor(0);
+
+      const div = s.add.rectangle(cx, y + ROW, 1230, 1, 0x2a2a3a).setDepth(D + 1).setScrollFactor(0);
+      this.elements.push(rowBg, nm, pk, fk, co, nf, nt, div);
     });
 
-    const ft = s.add.text(cx, 530, '⚡ Triggers: trg_level_up (BEFORE UPDATE OF xp), trg_auto_equip (AFTER INSERT ON inventory)\n📦 RPCs: rpc_loot_drop(), rpc_start_battle(), rpc_join_guild() — server-side atomic functions\n🔒 RLS: USING (auth.uid() = player_id) on players, inventory, player_quests\n🔍 Indexes: idx_players_zone (current_zone), idx_inv_player (player_id), idx_battle_ts (timestamp)\n👁 Views: v_leaderboard (ORDER BY level DESC), v_guild_stats (JOIN + GROUP BY guild_id)', {
-      fontFamily: 'Inter', fontSize: '8px', color: '#666677', align: 'center', lineSpacing: 3
-    }).setOrigin(0.5).setDepth(401).setScrollFactor(0);
+    const ft = s.add.text(cx, 707,
+      'Triggers: trg_level_up (BEFORE UPDATE xp)  trg_auto_equip (AFTER INSERT inventory)  |  ' +
+      'RLS: auth.uid() = player_id  |  Indexes: idx_players_zone  idx_inv_player  |  Views: v_leaderboard  v_guild_stats', {
+      fontFamily: 'Arial, sans-serif', fontSize: '11px', color: '#666688',
+      align: 'center', wordWrap: { width: 1200 }
+    }).setOrigin(0.5, 1).setDepth(D + 1).setScrollFactor(0);
     this.elements.push(ft);
+  }
+
+  // ─── EXPANDED SQL VIEW (click on entry) ─────────────────
+  _showExpanded(type, sql, color, concept, time) {
+    if (this.expandedModal) {
+      this.expandedModal.forEach(e => e.destroy());
+      this.expandedModal = null;
+      return;
+    }
+    const s = this.scene;
+    const cx = 640, cy = 360;
+    const els = [];
+
+    const dim = s.add.rectangle(cx, cy, 1280, 720, 0x000000, 0.75)
+      .setDepth(500).setScrollFactor(0).setInteractive();
+    dim.on('pointerdown', () => {
+      els.forEach(e => e.destroy());
+      this.expandedModal = null;
+    });
+    els.push(dim);
+
+    const colorInt = Phaser.Display.Color.HexStringToColor(color).color;
+    const modal = s.add.rectangle(cx, cy, 740, 480, 0x07070e, 0.98)
+      .setStrokeStyle(2, colorInt, 1).setDepth(501).setScrollFactor(0);
+    els.push(modal);
+
+    const headerTxt = s.add.text(cx, cy - 215, `[${type}]  ${time}`, {
+      fontFamily: '"Press Start 2P"', fontSize: '9px', color
+    }).setOrigin(0.5, 0).setDepth(502).setScrollFactor(0);
+    els.push(headerTxt);
+
+    const sqlTxt = s.add.text(cx - 340, cy - 185, sql, {
+      fontFamily: '"Courier New", monospace', fontSize: '14px', color: '#55ff77',
+      wordWrap: { width: 680 }, lineSpacing: 5
+    }).setDepth(502).setScrollFactor(0);
+    els.push(sqlTxt);
+
+    if (concept && CONCEPTS[concept]) {
+      const c = CONCEPTS[concept];
+      const divider = s.add.rectangle(cx, cy + 130, 680, 1, 0x333355, 1).setDepth(502).setScrollFactor(0);
+      const cTitle = s.add.text(cx, cy + 142, c.title, {
+        fontFamily: '"Press Start 2P"', fontSize: '7px', color: c.color
+      }).setOrigin(0.5, 0).setDepth(502).setScrollFactor(0);
+      const cDesc = s.add.text(cx, cy + 162, c.desc.replace('\n', ' | '), {
+        fontFamily: '"Courier New", monospace', fontSize: '11px', color: '#aaaacc',
+        wordWrap: { width: 680 }, align: 'center'
+      }).setOrigin(0.5, 0).setDepth(502).setScrollFactor(0);
+      els.push(divider, cTitle, cDesc);
+    }
+
+    const closeTxt = s.add.text(cx, cy + 215, '[ CLICK ANYWHERE TO CLOSE ]', {
+      fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#333355'
+    }).setOrigin(0.5, 1).setDepth(502).setScrollFactor(0);
+    els.push(closeTxt);
+
+    this.expandedModal = els;
   }
 
   // ─── CONCEPTS PANEL (C key) ──────────────────────────────
