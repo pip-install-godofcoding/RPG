@@ -101,7 +101,7 @@ export class DBMSMode {
     const s = this.scene;
     s.add.rectangle(640, 12, 560, 20, 0x1a0f00, 0.9)
       .setStrokeStyle(1, 0xff8800, 0.5).setDepth(300).setScrollFactor(0);
-    s.add.text(640, 12, '🗄 DBMS LEARNING MODE  |  [TAB] Schema  |  [C] Concepts  |  [J] Quests', {
+    s.add.text(640, 12, '🗄 DBMS MODE  |  [TAB] Schema  |  [C] Concepts  |  [B] Sandbox  |  [J] Quests', {
       fontFamily: '"Press Start 2P"', fontSize: '5px', color: '#ff8800'
     }).setOrigin(0.5).setDepth(301).setScrollFactor(0);
   }
@@ -300,9 +300,10 @@ export class DBMSMode {
     });
   }
 
-  // ─── SCHEMA PANEL (TAB) ──────────────────────────────────
+  // ─── SCHEMA PANEL (TAB) — HTML overlay, hides game map ───
   _cyclePanel() {
     if (this.currentPanel) {
+      if (this.schemaOverlay) { this.schemaOverlay.remove(); this.schemaOverlay = null; }
       this.elements.forEach(e => e.destroy());
       this.elements = [];
       this.currentPanel = null;
@@ -313,89 +314,108 @@ export class DBMSMode {
 
   _showSchema() {
     this.currentPanel = 'schema';
-    const s = this.scene, cx = 640, cy = 360;
-    const PX = '"Press Start 2P"';
-    const D  = 1000;
-
-    // Full-screen cover — sits above every HUD layer
-    const dim = s.add.rectangle(cx, cy, 1280, 720, 0x000000, 0.92).setDepth(D - 1).setScrollFactor(0);
-    const bg  = s.add.rectangle(cx, cy, 1250, 708, 0x0a0a14, 1)
-      .setStrokeStyle(3, 0xff8800, 1).setDepth(D).setScrollFactor(0);
-
-    // Title keeps the game font (it's big enough to look good)
-    const title = s.add.text(cx, 32, 'DATABASE SCHEMA  —  3rd Normal Form', {
-      fontFamily: PX, fontSize: '13px', color: '#ff9900',
-      stroke: '#0a0005', strokeThickness: 4
-    }).setOrigin(0.5).setDepth(D + 1).setScrollFactor(0);
-
-    const closeBtn = s.add.text(1240, 32, '[TAB] Close', {
-      fontFamily: PX, fontSize: '8px', color: '#886633'
-    }).setOrigin(1, 0.5).setDepth(D + 1).setScrollFactor(0);
-
-    const divTop = s.add.rectangle(cx, 56, 1230, 2, 0xff8800, 0.5).setDepth(D + 1).setScrollFactor(0);
-    this.elements.push(dim, bg, title, closeBtn, divTop);
 
     const tables = [
-      { n: 'players',       pk: 'player_id UUID',      fk: 'guild_id → guilds',                             cols: 'username, class, level, xp, hp, max_hp, mana, gold, position_x, position_y, current_zone, is_online', nf: '3NF',   note: 'No partial/transitive deps.\nguild_id is FK, not repeated.' },
-      { n: 'item_types',    pk: 'type_id SERIAL',      fk: '—',                                             cols: 'type_name  (weapon | armor | potion | quest)',                                                          nf: '1NF',   note: 'Lookup table — each type\nstored ONCE, items ref by FK.' },
-      { n: 'items',         pk: 'item_id UUID',         fk: 'type_id → item_types,  rarity_id → rarity',    cols: 'name, attack_bonus, defense_bonus, sell_price, lore_text',                                             nf: '3NF',   note: 'type & rarity moved out\nto remove transitive deps.' },
-      { n: 'inventory',     pk: 'inv_id UUID',          fk: 'player_id → players,  item_id → items',        cols: 'quantity, equipped BOOL, slot',                                                                        nf: '3NF',   note: 'Junction table: resolves\nM:N players ↔ items.' },
-      { n: 'guilds',        pk: 'guild_id UUID',        fk: '—',                                             cols: 'guild_name, guild_tag, level, gold_bank, max_members',                                                nf: '3NF',   note: 'Independent entity.\nPlayers ref via FK.' },
-      { n: 'battle_log',    pk: 'log_id UUID',          fk: 'attacker_id → players,  defender_id → players', cols: 'damage, skill_used, is_critical, timestamp, zone',                                                   nf: 'Audit', note: 'Append-only log.\nSupports COUNT / AVG queries.' },
-      { n: 'player_quests', pk: 'player_id + quest_id', fk: 'player_id → players,  quest_id → quests',      cols: 'status, progress JSONB, started_at, completed_at',                                                    nf: '3NF',   note: 'Composite PK junction.\nM:N players ↔ quests.' }
+      { n:'players',       pk:'player_id UUID (PK)',      fk:'guild_id → guilds.guild_id',              cols:'username, class, level, xp, hp, max_hp, mana, gold, position_x, position_y, current_zone, is_online', nf:'3NF', nfColor:'#44ff44', note:'No partial or transitive dependencies. guild_id references guilds table via FK — guild data is never duplicated in player rows.' },
+      { n:'item_types',    pk:'type_id SERIAL (PK)',      fk:'None',                                     cols:'type_name (weapon | armor | potion | quest)',                                                          nf:'1NF', nfColor:'#88ddff', note:'Lookup table with atomic values only. Each type stored ONCE, items reference by FK → eliminates repeating groups.' },
+      { n:'items',         pk:'item_id UUID (PK)',         fk:'type_id → item_types, rarity_id → rarity', cols:'name, attack_bonus, defense_bonus, sell_price, lore_text',                                             nf:'3NF', nfColor:'#44ff44', note:'Type and rarity extracted into separate tables. Removes transitive dependency: item → type_name was dependent on type_id, not item_id.' },
+      { n:'inventory',     pk:'inv_id UUID (PK)',          fk:'player_id → players, item_id → items',     cols:'quantity, equipped BOOL, slot',                                                                        nf:'3NF', nfColor:'#44ff44', note:'Junction table resolving M:N relationship between players and items. Each row links one player to one item.' },
+      { n:'guilds',        pk:'guild_id UUID (PK)',        fk:'None',                                     cols:'guild_name, guild_tag, level, gold_bank, max_members',                                                nf:'3NF', nfColor:'#44ff44', note:'Independent entity. Players reference guilds via FK — guild info stored once, not repeated per player.' },
+      { n:'battle_log',    pk:'log_id UUID (PK)',          fk:'attacker_id → players',                    cols:'defender_id, damage, skill_used, is_critical, timestamp, zone',                                        nf:'Audit', nfColor:'#ffaa44', note:'Append-only audit log. Supports aggregate queries: COUNT battles, AVG damage, combat analytics.' },
+      { n:'player_quests', pk:'(player_id, quest_id) Composite', fk:'player_id → players, quest_id → quests', cols:'status, progress JSONB, started_at, completed_at',                                                nf:'3NF', nfColor:'#44ff44', note:'Composite PK junction table. Resolves M:N between players and quests. No partial dependencies — status depends on the full composite key.' }
     ];
 
-    const ROW = 86, LEFT = 30, RIGHT = 1240;
-    tables.forEach((tb, i) => {
-      const y = 65 + i * ROW;
-      const shade = (i % 2 === 0) ? 0x0e0e1c : 0x0a0a12;
-      const rowBg = s.add.rectangle(cx, y + ROW / 2, 1230, ROW - 1, shade).setDepth(D).setScrollFactor(0);
+    const tableRows = tables.map((t, i) => `
+      <tr style="background:${i%2===0?'#0e0e1c':'#0a0a12'}; border-bottom:1px solid #1a1a2a;">
+        <td style="padding:12px 16px; vertical-align:top;">
+          <div style="color:#ffcc44; font-weight:bold; font-size:16px; margin-bottom:4px;">${t.n}</div>
+          <div style="color:#44dd66; font-size:12px; margin-top:6px;">${t.cols}</div>
+        </td>
+        <td style="padding:12px; color:#77bbff; font-size:13px; vertical-align:top; font-family:'Courier New',monospace;">${t.pk}</td>
+        <td style="padding:12px; color:#ffaa66; font-size:13px; vertical-align:top; font-family:'Courier New',monospace;">${t.fk}</td>
+        <td style="padding:12px; text-align:center; vertical-align:top;">
+          <span style="background:${t.nfColor}22; color:${t.nfColor}; border:1px solid ${t.nfColor}44;
+            padding:3px 10px; border-radius:4px; font-weight:bold; font-size:13px;">${t.nf}</span>
+        </td>
+        <td style="padding:12px; color:#aaaacc; font-size:13px; vertical-align:top; max-width:280px;">${t.note}</td>
+      </tr>
+    `).join('');
 
-      // Table name — Press Start 2P (big enough to look good)
-      const nm = s.add.text(LEFT, y + 8, tb.n, {
-        fontFamily: PX, fontSize: '10px', color: '#ffcc44',
-        stroke: '#000', strokeThickness: 2
-      }).setDepth(D + 1).setScrollFactor(0);
+    const div = document.createElement('div');
+    div.id = 'schema-overlay';
+    div.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;background:#0a0a14;font-family:Arial,Helvetica,sans-serif;overflow-y:auto;';
+    div.innerHTML = `
+      <div style="max-width:1200px; margin:0 auto; padding:24px 32px;">
 
-      // PK / FK — plain Arial Bold, crisp and readable
-      const pk = s.add.text(LEFT, y + 30, `PK: ${tb.pk}`, {
-        fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
-        fontSize: '13px', color: '#77bbff'
-      }).setDepth(D + 1).setScrollFactor(0);
+        <!-- Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;
+          padding-bottom:12px; border-bottom:3px solid #ff8800;">
+          <h1 style="color:#ff9900; margin:0; font-size:24px;">📐 DATABASE SCHEMA — 3rd Normal Form</h1>
+          <button id="schema-close" style="background:none; border:2px solid #ff880066; color:#ff8800;
+            padding:8px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:bold;
+            transition:all 0.2s;"
+            onmouseover="this.style.background='#ff880022'" onmouseout="this.style.background='none'">[TAB] Close</button>
+        </div>
 
-      const fk = s.add.text(LEFT + 330, y + 30, `FK: ${tb.fk}`, {
-        fontFamily: 'Arial, sans-serif', fontStyle: 'bold',
-        fontSize: '13px', color: '#ffaa66'
-      }).setDepth(D + 1).setScrollFactor(0);
+        <!-- WHY 3NF Section -->
+        <div style="background:#0e1a0e; border:2px solid #44ff4444; border-radius:10px; padding:20px 24px;
+          margin-bottom:24px;">
+          <h3 style="color:#44ff44; margin:0 0 12px; font-size:17px;">📐 Why is 3NF (Third Normal Form) used here?</h3>
+          <div style="color:#ccddcc; font-size:14px; line-height:1.8;">
+            <p style="margin:0 0 10px;">In this RPG database, <strong style="color:#ffcc44;">3NF eliminates data redundancy and prevents anomalies</strong>. Here's the progression:</p>
+            <table style="width:100%; border-collapse:collapse; margin:8px 0;">
+              <tr style="border-bottom:1px solid #2a3a2a;">
+                <td style="padding:8px 12px; color:#88ddff; font-weight:bold; width:80px;">1NF</td>
+                <td style="padding:8px; color:#ccc;">All columns have <strong>atomic values</strong> — no arrays or repeating groups. Each cell holds one value.</td>
+                <td style="padding:8px; color:#44ee66; font-size:13px;">✓ item_types stores one type per row, not "weapon,armor"</td>
+              </tr>
+              <tr style="border-bottom:1px solid #2a3a2a;">
+                <td style="padding:8px 12px; color:#88ddff; font-weight:bold;">2NF</td>
+                <td style="padding:8px; color:#ccc;">No <strong>partial dependencies</strong> — every non-key column depends on the <em>entire</em> primary key.</td>
+                <td style="padding:8px; color:#44ee66; font-size:13px;">✓ player_quests: status depends on (player_id + quest_id), not just one</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 12px; color:#88ddff; font-weight:bold;">3NF</td>
+                <td style="padding:8px; color:#ccc;">No <strong>transitive dependencies</strong> — non-key columns don't depend on other non-key columns.</td>
+                <td style="padding:8px; color:#44ee66; font-size:13px;">✓ items: type_name moved to item_types (was dependent on type_id, not item_id)</td>
+              </tr>
+            </table>
+            <p style="margin:10px 0 0; color:#aabb99; font-size:13px;">
+              <strong>Without 3NF:</strong> If "weapon" was stored as text in every item row, renaming it to "melee_weapon" would require updating thousands of rows (UPDATE anomaly). 
+              With 3NF, you update ONE row in item_types. Similarly, deleting all swords wouldn't lose the "weapon" category (DELETE anomaly prevention).
+            </p>
+          </div>
+        </div>
 
-      // Columns — Arial regular, slightly smaller
-      const co = s.add.text(LEFT, y + 54, tb.cols, {
-        fontFamily: 'Arial, sans-serif', fontSize: '12px', color: '#44dd66',
-        wordWrap: { width: 830 }
-      }).setDepth(D + 1).setScrollFactor(0);
+        <!-- Schema Table -->
+        <table style="width:100%; border-collapse:collapse; font-size:14px; margin-bottom:20px;">
+          <thead>
+            <tr style="background:#12121f; border-bottom:2px solid #333355;">
+              <th style="text-align:left; padding:12px 16px; color:#888; font-size:13px;">TABLE & COLUMNS</th>
+              <th style="text-align:left; padding:12px; color:#888; font-size:13px;">PRIMARY KEY</th>
+              <th style="text-align:left; padding:12px; color:#888; font-size:13px;">FOREIGN KEYS</th>
+              <th style="text-align:center; padding:12px; color:#888; font-size:13px;">NF</th>
+              <th style="text-align:left; padding:12px; color:#888; font-size:13px;">WHY THIS DESIGN</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
 
-      // NF badge keeps pixel font (short word, looks intentional)
-      const nf = s.add.text(RIGHT, y + 8, tb.nf, {
-        fontFamily: PX, fontSize: '9px', color: '#ffee33'
-      }).setOrigin(1, 0).setDepth(D + 1).setScrollFactor(0);
+        <!-- Footer: Triggers, RLS, Indexes, Views -->
+        <div style="background:#0c0c18; border:1px solid #2a2a3a; border-radius:8px; padding:16px 20px;
+          display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px; color:#8888aa;">
+          <div><strong style="color:#ff6644;">⚡ Triggers:</strong> trg_level_up (BEFORE UPDATE xp) — auto levels up player</div>
+          <div><strong style="color:#ff4488;">🔒 RLS:</strong> auth.uid() = player_id — players can only modify own row</div>
+          <div><strong style="color:#aa88ff;">🔍 Indexes:</strong> idx_players_zone, idx_inventory_player, idx_battle_timestamp</div>
+          <div><strong style="color:#88ddff;">👁 Views:</strong> v_leaderboard (top 50 players), v_guild_stats (aggregated)</div>
+        </div>
 
-      // Notes — Arial, right-aligned
-      const nt = s.add.text(RIGHT, y + 30, tb.note, {
-        fontFamily: 'Arial, sans-serif', fontSize: '12px', color: '#aaaacc',
-        wordWrap: { width: 240 }, align: 'right'
-      }).setOrigin(1, 0).setDepth(D + 1).setScrollFactor(0);
+      </div>
+    `;
+    document.body.appendChild(div);
+    this.schemaOverlay = div;
 
-      const div = s.add.rectangle(cx, y + ROW, 1230, 1, 0x2a2a3a).setDepth(D + 1).setScrollFactor(0);
-      this.elements.push(rowBg, nm, pk, fk, co, nf, nt, div);
-    });
-
-    const ft = s.add.text(cx, 707,
-      'Triggers: trg_level_up (BEFORE UPDATE xp)  trg_auto_equip (AFTER INSERT inventory)  |  ' +
-      'RLS: auth.uid() = player_id  |  Indexes: idx_players_zone  idx_inv_player  |  Views: v_leaderboard  v_guild_stats', {
-      fontFamily: 'Arial, sans-serif', fontSize: '11px', color: '#666688',
-      align: 'center', wordWrap: { width: 1200 }
-    }).setOrigin(0.5, 1).setDepth(D + 1).setScrollFactor(0);
-    this.elements.push(ft);
+    div.querySelector('#schema-close').onclick = () => this._cyclePanel();
   }
 
   // ─── EXPANDED SQL VIEW (click on entry) ─────────────────

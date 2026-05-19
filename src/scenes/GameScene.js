@@ -15,6 +15,7 @@ import { AudioSystem } from '../systems/AudioSystem.js';
 import { VisualEffects } from '../systems/VisualEffects.js';
 import { QuestSystem } from '../systems/QuestSystem.js';
 import { DBMSMode } from '../systems/DBMSMode.js';
+import { DBMSSandbox } from '../systems/DBMSSandbox.js';
 import { MultiplayerManager } from '../multiplayer/MultiplayerManager.js';
 import { ENEMY_CONFIG, SPAWN_CONFIG } from '../config/EnemyConfig.js';
 
@@ -133,6 +134,7 @@ export class GameScene extends Phaser.Scene {
 
     // DBMS Mode
     this.dbms = new DBMSMode(this, this.player);
+    this.sandbox = new DBMSSandbox(this);
 
     // Multiplayer
     this.multiplayer = new MultiplayerManager(this, this.player);
@@ -153,7 +155,7 @@ export class GameScene extends Phaser.Scene {
 
     // Controls help
     const helpStr = window.ASHENVEIL.dbmsMode
-      ? 'WASD: Move | 1-4: Abilities | E: Interact | J: Quests | TAB: Schema | C: Concepts'
+      ? 'WASD: Move | 1-4: Abilities | E: Interact | J: Quests | TAB: Schema | C: Concepts | B: Sandbox'
       : 'WASD/Arrows: Move | 1-4: Abilities | Shift: Run | E: Interact | J: Quests';
     this.helpText = this.add.text(640, 710, helpStr, {
       fontFamily: 'Inter', fontSize: '10px', color: '#555566'
