@@ -94,11 +94,11 @@ export class MultiplayerManager {
 
   // Broadcast position every 100ms
   startSync() {
-    if (!this.connected) return;
     this.scene.time.addEvent({
       delay: 100, loop: true,
       callback: () => {
-        this.channel?.send({
+        if (!this.connected || !this.channel) return;
+        this.channel.send({
           type: 'broadcast', event: 'player_move',
           payload: {
             username: window.ASHENVEIL.username,

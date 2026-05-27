@@ -165,7 +165,7 @@ export class DBMSMode {
     // SQL text (the main content — large and readable)
     const sqlText = s.add.text(26, baseY - 24, sql, {
       fontFamily: '"Courier New", monospace', fontSize: '13px', color: '#44ee66',
-      wordWrap: { width: 295 }, lineSpacing: 2
+      wordWrap: { width: 295 }, lineSpacing: 2, maxLines: 4
     }).setDepth(297).setScrollFactor(0);
     els.push(sqlText);
 
