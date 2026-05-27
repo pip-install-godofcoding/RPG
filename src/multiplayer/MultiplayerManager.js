@@ -62,13 +62,31 @@ export class MultiplayerManager {
       .on('broadcast', { event: 'ability' }, ({ payload }) => {
         this._onRemoteAbility(payload);
       })
+      // ── PvP events ──────────────────────────────────────
+      .on('broadcast', { event: 'pvp_challenge' }, ({ payload }) => {
+        this.scene.pvp?.onChallengeReceived(payload);
+      })
+      .on('broadcast', { event: 'pvp_accepted' }, ({ payload }) => {
+        this.scene.pvp?.onChallengeAccepted(payload);
+      })
+      .on('broadcast', { event: 'pvp_declined' }, ({ payload }) => {
+        this.scene.pvp?.onChallengeDeclined(payload);
+      })
+      .on('broadcast', { event: 'pvp_attack' }, ({ payload }) => {
+        this.scene.pvp?.onPvPAttack(payload);
+      })
+      // ── Guild broadcast ──────────────────────────────────
+      .on('broadcast', { event: 'guild_update' }, ({ payload }) => {
+        this._onGuildUpdate(payload);
+      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await this.channel.track({
             username: window.ASHENVEIL.username,
             class: window.ASHENVEIL.playerClass,
             x: this.player.x, y: this.player.y,
-            level: this.player.level
+            level: this.player.level,
+            guild: window.ASHENVEIL.guildName || null,
           });
         }
       });
@@ -87,7 +105,8 @@ export class MultiplayerManager {
             x: this.player.x, y: this.player.y,
             dir: this.player.direction,
             anim: this.player.anims?.currentAnim?.key,
-            hp: this.player.stats.hp / this.player.stats.maxHp
+            hp: this.player.stats.hp / this.player.stats.maxHp,
+            guild: window.ASHENVEIL.guildName || null,
           }
         });
       }
@@ -120,37 +139,63 @@ export class MultiplayerManager {
       rp.sprite?.destroy();
       rp.nameTag?.destroy();
       rp.hpBar?.destroy();
+      rp.guildTag?.destroy();
+      rp.pvpHint?.destroy();
       delete this.remotePlayers[key];
     }
   }
 
   _renderRemotePlayer(key, data) {
     if (!this.remotePlayers[key]) {
-      const cls = data.class || 'warrior';
+      const cls    = data.class || 'warrior';
       const texKey = `${cls}_idle_down`;
       const sprite = this.scene.add.sprite(data.x || 0, data.y || 0, texKey, 0)
-        .setDepth(4).setAlpha(0.7);
-      const nameTag = this.scene.add.text(sprite.x, sprite.y - 24, key, {
+        .setDepth(4).setAlpha(0.85);
+
+      const nameTag = this.scene.add.text(sprite.x, sprite.y - 26, key, {
         fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#88aaff',
         stroke: '#000000', strokeThickness: 3
       }).setOrigin(0.5).setDepth(15);
+
+      const guildLabel = data.guild
+        ? this.scene.add.text(sprite.x, sprite.y - 36, `[${data.guild}]`, {
+            fontFamily: 'Inter, sans-serif', fontSize: '8px', color: '#a855f7',
+            stroke: '#000000', strokeThickness: 2
+          }).setOrigin(0.5).setDepth(15)
+        : null;
+
       const hpBar = this.scene.add.rectangle(sprite.x, sprite.y - 18, 28, 3, 0x44ff44)
         .setDepth(15);
-      this.remotePlayers[key] = { sprite, nameTag, hpBar, class: cls };
+
+      const pvpHint = this.scene.add.text(sprite.x, sprite.y + 18, '[P] PvP', {
+        fontFamily: 'Inter, sans-serif', fontSize: '7px', color: '#ff6666',
+        stroke: '#000000', strokeThickness: 2
+      }).setOrigin(0.5).setDepth(15).setAlpha(0);
+
+      this.remotePlayers[key] = { sprite, nameTag, hpBar, guildTag: guildLabel, pvpHint, class: cls };
     }
   }
 
   _onRemoteMove(data) {
     const rp = this.remotePlayers[data.username];
     if (!rp) return;
-    // Interpolate
-    this.scene.tweens.add({
-      targets: rp.sprite, x: data.x, y: data.y, duration: 100
-    });
-    rp.nameTag.setPosition(data.x, data.y - 24);
+
+    this.scene.tweens.add({ targets: rp.sprite, x: data.x, y: data.y, duration: 100 });
+    rp.nameTag.setPosition(data.x, data.y - 26);
     rp.hpBar.setPosition(data.x, data.y - 18);
     rp.hpBar.width = 28 * (data.hp || 1);
-    // Play animation
+    if (rp.guildTag) rp.guildTag.setPosition(data.x, data.y - 36);
+    if (rp.pvpHint)  rp.pvpHint.setPosition(data.x, data.y + 18);
+
+    if (this.scene.player && rp.pvpHint) {
+      const dist = Phaser.Math.Distance.Between(
+        this.scene.player.x, this.scene.player.y, data.x, data.y
+      );
+      rp.pvpHint.setAlpha(dist < 100 ? 0.8 : 0);
+    }
+
+    if (data.guild && rp.guildTag) rp.guildTag.setText(`[${data.guild}]`);
+
     if (data.anim && this.scene.anims.exists(data.anim)) {
       rp.sprite.play(data.anim, true);
     }
@@ -166,10 +211,16 @@ export class MultiplayerManager {
   }
 
   _onRemoteAbility(data) {
-    // Show remote player ability effects
     const rp = this.remotePlayers[data.username];
     if (rp && this.scene.vfx) {
       this.scene.vfx.impactEffect(rp.sprite.x, rp.sprite.y);
+    }
+  }
+
+  _onGuildUpdate(payload) {
+    const rp = this.remotePlayers[payload.username];
+    if (rp && rp.guildTag) {
+      rp.guildTag.setText(payload.guildName ? `[${payload.guildName}]` : '');
     }
   }
 
@@ -177,6 +228,13 @@ export class MultiplayerManager {
     this.channel?.send({
       type: 'broadcast', event: 'chat',
       payload: { username: window.ASHENVEIL.username, message }
+    });
+  }
+
+  sendGuildUpdate(guildName) {
+    this.channel?.send({
+      type: 'broadcast', event: 'guild_update',
+      payload: { username: window.ASHENVEIL.username, guildName }
     });
   }
 
@@ -201,7 +259,9 @@ export class MultiplayerManager {
     if (this.channel) {
       this.channel.unsubscribe();
       Object.values(this.remotePlayers).forEach(rp => {
-        rp.sprite?.destroy(); rp.nameTag?.destroy(); rp.hpBar?.destroy();
+        rp.sprite?.destroy(); rp.nameTag?.destroy();
+        rp.hpBar?.destroy();  rp.guildTag?.destroy();
+        rp.pvpHint?.destroy();
       });
       this.remotePlayers = {};
       this._joinChannel();

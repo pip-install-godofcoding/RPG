@@ -18,6 +18,9 @@ import { DBMSMode } from '../systems/DBMSMode.js';
 import { DBMSSandbox } from '../systems/DBMSSandbox.js';
 import { MultiplayerManager } from '../multiplayer/MultiplayerManager.js';
 import { ENEMY_CONFIG } from '../config/EnemyConfig.js';
+import { Marketplace } from '../systems/Marketplace.js';
+import { GuildSystem } from '../systems/GuildSystem.js';
+import { PvPSystem } from '../systems/PvPSystem.js';
 
 export class GameScene extends Phaser.Scene {
   constructor() { super('Game'); }
@@ -91,6 +94,12 @@ export class GameScene extends Phaser.Scene {
     this.multiplayer = new MultiplayerManager(this, this.player);
     this.multiplayer.startSync();
 
+    // ── New Multiplayer Systems ──────────────────────────
+    this.marketplace = new Marketplace(this, this.player);
+    this.guildSystem = new GuildSystem(this, this.player);
+    // PvP wired AFTER multiplayer so it can reference the channel
+    this.pvp = new PvPSystem(this, this.player, this.multiplayer);
+
     // NPC interactions (simple)
     this._createNPCs();
 
@@ -108,10 +117,10 @@ export class GameScene extends Phaser.Scene {
 
     // Controls help
     const helpStr = window.ASHENVEIL.dbmsMode
-      ? 'WASD: Move | E: Interact | J: Quests | TAB: Schema | C: Concepts | B: Sandbox'
-      : 'WASD/Arrows: Move | Shift: Run | E: Interact | J: Quests';
+      ? 'WASD: Move | E: Interact | J: Quests | TAB: Schema | C: Concepts | B: Sandbox | M: Shop | G: Guild | P: PvP'
+      : 'WASD/Arrows: Move | Shift: Run | E: Interact | J: Quests | M: Shop | G: Guild | P: PvP Challenge';
     this.helpText = this.add.text(640, 710, helpStr, {
-      fontFamily: 'Inter', fontSize: '15px', color: '#555566'
+      fontFamily: 'Inter', fontSize: '13px', color: '#555566'
     }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
   }
 
@@ -256,13 +265,14 @@ export class GameScene extends Phaser.Scene {
 
   _createNPCs() {
     const npcs = [
-      { type: 'elder', zone: 'ashenveil_village', ox: 5, oy: 5, name: 'Elder Mirela', dialogue: 'Welcome, hero. A terrible dragon named Vorathix\nhas made its lair far to the south.\nIt guards immense treasures...' },
-      { type: 'blacksmith', zone: 'ashenveil_village', ox: 10, oy: 8, name: 'Blacksmith Doran', dialogue: 'Need a blade sharpened?\nDefeat enemies to find better gear.' },
-      { type: 'merchant', zone: 'marketplace', ox: 5, oy: 5, name: 'Merchant Veth', dialogue: 'Fine wares, fresh from the caves!\nGold for goods, goods for gold.' },
-      { type: 'guard', zone: 'guild_citadel', ox: 5, oy: 5, name: 'Captain Solen', dialogue: 'The citadel stands strong.\nJoin a guild to grow in power.' },
-      { type: 'quest_giver', zone: 'ashenveil_village', ox: 15, oy: 12, name: 'Wanderer Aelith', dialogue: 'I sense great potential in you...\nVenture into the Dark Forest.\n[Quest: Into Darkness]' },
-      { type: 'elder', zone: 'oakhaven_village', ox: 15, oy: 15, name: 'Elder Sylas', dialogue: 'Beware the Slime Throne to the south.\nAn ancient Slime King has grown massive by devouring all in its path.\nOnly a true hero can stop it.' },
-      { type: 'elder', zone: 'frostpeak_village', ox: 15, oy: 15, name: 'Elder Kael', dialogue: 'The Frozen Depths hold a chilling terror.\nA Frost Colossus has awakened from its icy slumber.\nIt seeks to freeze the world.' }
+      { type: 'elder',       zone: 'ashenveil_village', ox: 5,  oy: 5,  name: 'Elder Mirela',     action: 'dialogue',    dialogue: 'Welcome, hero. A terrible dragon named Vorathix\nhas made its lair far to the south.\nIt guards immense treasures...' },
+      { type: 'blacksmith',  zone: 'ashenveil_village', ox: 10, oy: 8,  name: 'Blacksmith Doran', action: 'dialogue',    dialogue: 'Need a blade sharpened?\nDefeat enemies to find better gear.\nVisit the Marketplace for supplies!' },
+      { type: 'merchant',    zone: 'marketplace',       ox: 5,  oy: 5,  name: 'Merchant Veth',    action: 'marketplace', dialogue: 'Fine wares! Press [E] to browse my shop.' },
+      { type: 'guard',       zone: 'guild_citadel',     ox: 5,  oy: 5,  name: 'Captain Solen',    action: 'guild',       dialogue: 'The citadel stands strong. Press [E] to enter the Guild Hall.' },
+      { type: 'quest_giver', zone: 'ashenveil_village', ox: 15, oy: 12, name: 'Wanderer Aelith',  action: 'dialogue',    dialogue: 'I sense great potential in you...\nVenture into the Dark Forest.\n[Quest: Into Darkness]' },
+      { type: 'elder',       zone: 'oakhaven_village',  ox: 15, oy: 15, name: 'Elder Sylas',      action: 'dialogue',    dialogue: 'Beware the Slime Throne to the south.\nAn ancient Slime King has grown massive.\nOnly a true hero can stop it.' },
+      { type: 'elder',       zone: 'frostpeak_village', ox: 15, oy: 15, name: 'Elder Kael',       action: 'dialogue',    dialogue: 'The Frozen Depths hold a chilling terror.\nA Frost Colossus has awakened.\nIt seeks to freeze the world.' },
+      { type: 'merchant',    zone: 'guild_citadel',     ox: 12, oy: 8,  name: 'Guild Quartermaster', action: 'marketplace', dialogue: 'Guild members get access to special wares! [E] to shop.' },
     ];
 
     this.npcSprites = [];
@@ -284,15 +294,28 @@ export class GameScene extends Phaser.Scene {
       sprite.body.setSize(28, 28);
       sprite.npcData = npc;
 
-      // Name tag
+      // Action hint tag
+      const actionHint = npc.action === 'marketplace' ? '🏪 Shop' : npc.action === 'guild' ? '⚔ Guild' : '';
+      const nameColor  = npc.action === 'marketplace' ? '#ffd700' : npc.action === 'guild' ? '#a855f7' : '#88cc88';
       const tag = this.add.text(nx, ny - 24, npc.name, {
-        fontFamily: 'Inter, sans-serif', fontSize: '7px', color: '#88cc88'
+        fontFamily: 'Inter, sans-serif', fontSize: '7px', color: nameColor
       }).setOrigin(0.5).setDepth(10);
+      if (actionHint) {
+        this.add.text(nx, ny - 32, actionHint, {
+          fontFamily: 'Inter, sans-serif', fontSize: '7px', color: nameColor
+        }).setOrigin(0.5).setDepth(10);
+      }
 
       // Interaction zone
       this.physics.add.overlap(this.player, sprite, () => {
         if (Phaser.Input.Keyboard.JustDown(this.player.interactKey)) {
-          this._showDialogue(npc);
+          if (npc.action === 'marketplace') {
+            this.marketplace?.show(npc.name);
+          } else if (npc.action === 'guild') {
+            this.guildSystem?.show();
+          } else {
+            this._showDialogue(npc);
+          }
         }
       });
 
