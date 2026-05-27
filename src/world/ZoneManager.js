@@ -36,12 +36,18 @@ export class ZoneManager {
         return;
       }
     }
-    // Outside all zones — wilderness
+    // Outside all zones — wilderness (invalid location due to map changes)
     if (this.currentZone !== 'wilderness') {
       this.previousZone = this.currentZone;
       this.currentZone = 'wilderness';
       if (this.onZoneChange) {
         this.onZoneChange('wilderness', { name: 'The Wilds' });
+      }
+      
+      // Auto-rescue: teleport player back to village if they are stuck in the void
+      const spawn = this.getSpawnPoint('ashenveil_village');
+      if (this.scene && this.scene.player) {
+        this.scene.player.setPosition(spawn.x, spawn.y);
       }
     }
   }

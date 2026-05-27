@@ -22,6 +22,8 @@ export const COLORS = {
   fire_imp: 0xff6633,
   crystal_golem: 0x33cccc,
   dragon: 0xff2222,
+  slime_king: 0x22aa22,
+  frost_colossus: 0x88ccff,
   npc_elder: 0xeedd88,
   npc_merchant: 0xcc88dd,
   npc_blacksmith: 0xaa7744,
@@ -51,13 +53,21 @@ export const COLORS = {
 };
 
 export const ZONES = {
-  ashenveil_village: { x: 60, y: 40, w: 40, h: 40, name: 'Ashenveil Village', ground: 'grass', accent: 'road' },
-  guild_citadel:     { x: 10, y: 10, w: 30, h: 30, name: 'Guild Citadel', ground: 'stone', accent: 'wall' },
-  marketplace:       { x: 110, y: 10, w: 25, h: 25, name: 'Marketplace', ground: 'sand', accent: 'road' },
-  dark_forest:       { x: 10, y: 90, w: 50, h: 50, name: 'Dark Forest', ground: 'dark_grass', accent: 'grass' },
-  crystal_caves:     { x: 110, y: 90, w: 45, h: 45, name: 'Crystal Caves', ground: 'obsidian', accent: 'crystal' },
-  dragons_lair:      { x: 60, y: 140, w: 35, h: 35, name: "Dragon's Lair", ground: 'obsidian', accent: 'lava' },
-  boss_arena:        { x: 75, y: 175, w: 30, h: 25, name: 'Boss Arena', ground: 'obsidian', accent: 'stone' }
+  // A contiguous grid layout: each zone is 40x40 tiles to ensure walls and entrances align perfectly.
+  oakhaven_village:  { x: 80, y: 20, w: 40, h: 40, name: 'Oakhaven Village', ground: 'grass', accent: 'wood' },
+  oakhaven_boss:     { x: 120, y: 20, w: 40, h: 40, name: 'Slime Throne', ground: 'dark_grass', accent: 'stone' },
+  
+  guild_citadel:     { x: 40, y: 60, w: 40, h: 40, name: 'Guild Citadel', ground: 'stone', accent: 'wall' },
+  ashenveil_village: { x: 80, y: 60, w: 40, h: 40, name: 'Ashenveil Village', ground: 'grass', accent: 'road' },
+  marketplace:       { x: 120, y: 60, w: 40, h: 40, name: 'Marketplace', ground: 'sand', accent: 'road' },
+  
+  frostpeak_village: { x: 40, y: 100, w: 40, h: 40, name: 'Frostpeak Village', ground: 'stone', accent: 'crystal' },
+  dark_forest:       { x: 80, y: 100, w: 40, h: 40, name: 'Dark Forest', ground: 'dark_grass', accent: 'grass' },
+  crystal_caves:     { x: 120, y: 100, w: 40, h: 40, name: 'Crystal Caves', ground: 'obsidian', accent: 'crystal' },
+  
+  frostpeak_boss:    { x: 40, y: 140, w: 40, h: 40, name: 'Frozen Depths', ground: 'obsidian', accent: 'crystal' },
+  dragons_lair:      { x: 80, y: 140, w: 40, h: 40, name: "Dragon's Lair", ground: 'obsidian', accent: 'lava' },
+  boss_arena:        { x: 120, y: 140, w: 40, h: 40, name: 'Boss Arena', ground: 'obsidian', accent: 'stone' }
 };
 
 export const SUPABASE_URL = 'https://vcuiodofvaprdesdatts.supabase.co';

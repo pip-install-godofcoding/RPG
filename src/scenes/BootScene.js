@@ -12,11 +12,11 @@ export class BootScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#0a0a0f');
 
     this.add.text(width / 2, height / 2 - 60, 'REALM OF ASHENVEIL', {
-      fontFamily: '"Press Start 2P"', fontSize: '20px', color: '#a855f7'
+      fontFamily: 'Inter, sans-serif', fontSize: '20px', color: '#a855f7'
     }).setOrigin(0.5);
 
     const loadTxt = this.add.text(width / 2, height / 2, 'Forging the world...', {
-      fontFamily: '"Press Start 2P"', fontSize: '12px', color: '#e0d0b0'
+      fontFamily: 'Inter, sans-serif', fontSize: '18px', color: '#e0d0b0'
     }).setOrigin(0.5);
 
     this.add.rectangle(width / 2, height / 2 + 40, 400, 16, 0x1a1a2e);

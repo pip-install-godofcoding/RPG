@@ -23,7 +23,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.stats = { ...this.classConfig.stats };
     this.level = 1;
     this.xp = 0;
-    this.xpToNext = 100;
+    this.xpToNext = 40;
     this.gold = 100;
     this.direction = DIR.DOWN;
     this.isAttacking = false;
@@ -53,10 +53,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     };
     this.interactKey = scene.input.keyboard.addKey('E');
 
-    // Setup ability key listeners
-    Object.entries(this.keys).forEach(([num, key]) => {
-      key.on('down', () => this.useAbility(parseInt(num)));
-    });
+    // Setup ability key listeners - Disabled for overworld, abilities are now used in BattleScene
+    // Object.entries(this.keys).forEach(([num, key]) => {
+    //   key.on('down', () => this.useAbility(parseInt(num)));
+    // });
 
     // Play idle
     this._playAnim('idle');
@@ -314,7 +314,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.stats.hp = this.stats.maxHp;
       this.stats.attack += 2;
       this.stats.defense += 1;
-      this.xpToNext = this.level * this.level * 100;
+      this.xpToNext = this.level * 40;
       this.scene.events.emit('levelUp', this);
     }
   }

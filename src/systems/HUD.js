@@ -23,7 +23,7 @@ export class HUD {
     this.hpBg = this.scene.add.rectangle(x, 20, w, h, 0x1a1a2e).setOrigin(0, 0).setDepth(100).setScrollFactor(0);
     this.hpFill = this.scene.add.rectangle(x + 1, 21, w - 2, h - 2, COLORS.hpBar).setOrigin(0, 0).setDepth(101).setScrollFactor(0);
     this.hpText = this.scene.add.text(x + w / 2, 20 + h / 2, '', {
-      fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#ffffff'
+      fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#ffffff'
     }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
 
     // MP/Stamina
@@ -31,7 +31,7 @@ export class HUD {
     this.mpBg = this.scene.add.rectangle(x, 40, w, h, 0x1a1a2e).setOrigin(0, 0).setDepth(100).setScrollFactor(0);
     this.mpFill = this.scene.add.rectangle(x + 1, 41, w - 2, h - 2, mpColor).setOrigin(0, 0).setDepth(101).setScrollFactor(0);
     this.mpText = this.scene.add.text(x + w / 2, 40 + h / 2, '', {
-      fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#ffffff'
+      fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#ffffff'
     }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
 
     // XP
@@ -40,12 +40,12 @@ export class HUD {
 
     // Level badge
     this.levelBadge = this.scene.add.text(x + w + 10, 20, 'LV 1', {
-      fontFamily: '"Press Start 2P"', fontSize: '10px', color: '#e0d0b0'
+      fontFamily: 'Inter, sans-serif', fontSize: '15px', color: '#e0d0b0'
     }).setDepth(102).setScrollFactor(0);
 
     // Gold
     this.goldText = this.scene.add.text(x + w + 10, 50, '💰 100', {
-      fontFamily: 'Inter', fontSize: '12px', color: '#ccaa22', fontStyle: 'bold'
+      fontFamily: 'Inter', fontSize: '18px', color: '#ccaa22', fontStyle: 'bold'
     }).setDepth(102).setScrollFactor(0);
   }
 
@@ -59,10 +59,10 @@ export class HUD {
       const bg = this.scene.add.rectangle(sx, y, 44, 44, 0x111122, 0.9)
         .setStrokeStyle(1, 0x4444aa, 0.6).setDepth(100).setScrollFactor(0);
       const label = this.scene.add.text(sx, y - 16, `${ab.key}`, {
-        fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#888899'
+        fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#888899'
       }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
       const name = this.scene.add.text(sx, y + 4, ab.name.split(' ')[0], {
-        fontFamily: '"Press Start 2P"', fontSize: '5px', color: '#aabbcc'
+        fontFamily: 'Inter, sans-serif', fontSize: '7px', color: '#aabbcc'
       }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
       const cdOverlay = this.scene.add.rectangle(sx, y, 44, 44, 0x000000, 0)
         .setDepth(101).setScrollFactor(0);
@@ -73,14 +73,14 @@ export class HUD {
 
   _createZoneName() {
     this.zoneText = this.scene.add.text(640, 15, 'Ashenveil Village', {
-      fontFamily: '"Press Start 2P"', fontSize: '10px', color: '#e0d0b0',
+      fontFamily: 'Inter, sans-serif', fontSize: '15px', color: '#e0d0b0',
       stroke: '#000000', strokeThickness: 3
     }).setOrigin(0.5, 0).setDepth(102).setScrollFactor(0);
   }
 
   _createPlayerInfo() {
     this.nameText = this.scene.add.text(20, 76, `${window.ASHENVEIL.username} — ${this.player.classConfig.name}`, {
-      fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#888899'
+      fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#888899'
     }).setDepth(102).setScrollFactor(0);
   }
 
@@ -90,7 +90,7 @@ export class HUD {
       const size = isCrit ? '14px' : '10px';
       const prefix = isCrit ? 'CRIT ' : '';
       const txt = this.scene.add.text(x, y, `${prefix}${amount}`, {
-        fontFamily: '"Press Start 2P"', fontSize: size, color,
+        fontFamily: 'Inter, sans-serif', fontSize: size, color,
         stroke: '#000000', strokeThickness: 2
       }).setOrigin(0.5).setDepth(50);
       this.scene.tweens.add({
@@ -101,7 +101,7 @@ export class HUD {
 
     this.scene.events.on('levelUp', (player) => {
       const txt = this.scene.add.text(640, 300, '✦ LEVEL UP! ✦', {
-        fontFamily: '"Press Start 2P"', fontSize: '20px', color: '#ffdd00',
+        fontFamily: 'Inter, sans-serif', fontSize: '20px', color: '#ffdd00',
         stroke: '#000000', strokeThickness: 4
       }).setOrigin(0.5).setDepth(200).setScrollFactor(0);
       this.scene.tweens.add({
@@ -123,7 +123,7 @@ export class HUD {
 
     this.scene.events.on('enemyKilled', ({ gold, xp }) => {
       const txt = this.scene.add.text(this.player.x, this.player.y - 30, `+${xp}XP +${gold}G`, {
-        fontFamily: '"Press Start 2P"', fontSize: '8px', color: '#44ff44',
+        fontFamily: 'Inter, sans-serif', fontSize: '12px', color: '#44ff44',
         stroke: '#000000', strokeThickness: 2
       }).setOrigin(0.5).setDepth(50);
       this.scene.tweens.add({
@@ -134,7 +134,7 @@ export class HUD {
 
     this.scene.events.on('playerDied', () => {
       const txt = this.scene.add.text(640, 360, 'YOU DIED', {
-        fontFamily: '"Press Start 2P"', fontSize: '28px', color: '#cc2222',
+        fontFamily: 'Inter, sans-serif', fontSize: '28px', color: '#cc2222',
         stroke: '#000000', strokeThickness: 4
       }).setOrigin(0.5).setDepth(200).setScrollFactor(0);
       this.scene.tweens.add({

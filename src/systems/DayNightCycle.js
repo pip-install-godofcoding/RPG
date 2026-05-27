@@ -13,7 +13,7 @@ export class DayNightCycle {
 
     // Clock display
     this.clockText = scene.add.text(1200, 20, '☀ DAY', {
-      fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#e0d0b0'
+      fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#e0d0b0'
     }).setDepth(102).setScrollFactor(0);
   }
 

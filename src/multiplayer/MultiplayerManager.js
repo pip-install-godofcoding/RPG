@@ -107,7 +107,7 @@ export class MultiplayerManager {
     this._renderRemotePlayer(key, presence);
     // Notification
     const txt = this.scene.add.text(640, 160, `${key} joined the zone`, {
-      fontFamily: '"Press Start 2P"', fontSize: '8px', color: '#44ff44',
+      fontFamily: 'Inter, sans-serif', fontSize: '12px', color: '#44ff44',
       stroke: '#000000', strokeThickness: 2
     }).setOrigin(0.5).setDepth(200).setScrollFactor(0);
     this.scene.tweens.add({ targets: txt, alpha: 0, y: 140, duration: 2000,
@@ -131,7 +131,7 @@ export class MultiplayerManager {
       const sprite = this.scene.add.sprite(data.x || 0, data.y || 0, texKey, 0)
         .setDepth(4).setAlpha(0.7);
       const nameTag = this.scene.add.text(sprite.x, sprite.y - 24, key, {
-        fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#88aaff',
+        fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#88aaff',
         stroke: '#000000', strokeThickness: 3
       }).setOrigin(0.5).setDepth(15);
       const hpBar = this.scene.add.rectangle(sprite.x, sprite.y - 18, 28, 3, 0x44ff44)
@@ -158,7 +158,7 @@ export class MultiplayerManager {
 
   _onChat(data) {
     const txt = this.scene.add.text(640, 180, `[${data.username}]: ${data.message}`, {
-      fontFamily: 'Inter', fontSize: '12px', color: '#ffffff',
+      fontFamily: 'Inter', fontSize: '18px', color: '#ffffff',
       stroke: '#000000', strokeThickness: 2
     }).setOrigin(0.5).setDepth(200).setScrollFactor(0);
     this.scene.tweens.add({ targets: txt, alpha: 0, y: 160, duration: 5000,

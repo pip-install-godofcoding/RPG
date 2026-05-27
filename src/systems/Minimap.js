@@ -25,6 +25,7 @@ export class Minimap {
 
     // Player dot on minimap
     this.playerDot = scene.add.circle(player.x, player.y, 12, 0xffffff).setDepth(95);
+    scene.cameras.main.ignore(this.playerDot);
     this.scene.tweens.add({
       targets: this.playerDot, scale: 0.6, duration: 600, yoyo: true, repeat: -1
     });
@@ -38,13 +39,14 @@ export class Minimap {
         .setStrokeStyle(3, 0x6666aa, 0.4).setDepth(94);
       this.zoneMarkers.push(rect);
     });
+    scene.cameras.main.ignore(this.zoneMarkers);
 
     // Ignore HUD elements from minimap camera
     this.cam.ignore([this.border]);
 
     // Player count text
     this.countText = scene.add.text(this.x + this.width / 2, this.y + this.height - 8, 'Players: 1', {
-      fontFamily: '"Press Start 2P"', fontSize: '5px', color: '#888899'
+      fontFamily: 'Inter, sans-serif', fontSize: '7px', color: '#888899'
     }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
   }
 

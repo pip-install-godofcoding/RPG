@@ -14,12 +14,12 @@ export class ClassSelectScene extends Phaser.Scene {
 
     // Header
     this.add.text(width / 2, 40, 'CHOOSE THY CLASS', {
-      fontFamily: '"Press Start 2P"', fontSize: '18px', color: '#e0d0b0',
+      fontFamily: 'Inter, sans-serif', fontSize: '18px', color: '#e0d0b0',
       stroke: '#2a1a3e', strokeThickness: 3
     }).setOrigin(0.5);
 
     this.add.text(width / 2, 70, `Hero: ${window.ASHENVEIL.username}`, {
-      fontFamily: '"Press Start 2P"', fontSize: '10px', color: '#a855f7'
+      fontFamily: 'Inter, sans-serif', fontSize: '15px', color: '#a855f7'
     }).setOrigin(0.5);
 
     const classes = Object.entries(CLASS_CONFIG);
@@ -45,7 +45,7 @@ export class ClassSelectScene extends Phaser.Scene {
 
       // Class name
       this.add.text(cx, cy - cardH / 2 + 30, cfg.name.toUpperCase(), {
-        fontFamily: '"Press Start 2P"', fontSize: '11px', color: '#e0d0b0'
+        fontFamily: 'Inter, sans-serif', fontSize: '16px', color: '#e0d0b0'
       }).setOrigin(0.5);
 
       // Sprite preview
@@ -71,7 +71,7 @@ export class ClassSelectScene extends Phaser.Scene {
       stats.forEach((s, j) => {
         const sy = statY + j * 24;
         this.add.text(cx - cardW / 2 + 15, sy, s.label, {
-          fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#888899'
+          fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#888899'
         });
         const barStartX = cx - cardW / 2 + 50;
         const barW = 120;
@@ -79,24 +79,24 @@ export class ClassSelectScene extends Phaser.Scene {
         const fill = (s.value / s.max) * barW;
         this.add.rectangle(barStartX, sy + 5, fill, 8, s.color, 0.8).setOrigin(0, 0.5);
         this.add.text(barStartX + barW + 6, sy, `${s.value}`, {
-          fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#aaaaaa'
+          fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#aaaaaa'
         });
       });
 
       // Description
       this.add.text(cx, statY + 130, cfg.description, {
-        fontFamily: 'Inter', fontSize: '11px', color: '#888899',
+        fontFamily: 'Inter', fontSize: '16px', color: '#888899',
         wordWrap: { width: cardW - 30 }, align: 'center', lineSpacing: 3
       }).setOrigin(0.5, 0);
 
       // Abilities list
       const abY = statY + 190;
       this.add.text(cx, abY, 'ABILITIES', {
-        fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#a855f7'
+        fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#a855f7'
       }).setOrigin(0.5);
       cfg.abilities.forEach((ab, j) => {
         this.add.text(cx - cardW / 2 + 15, abY + 18 + j * 18, `[${ab.key}] ${ab.name}`, {
-          fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#aabbcc'
+          fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#aabbcc'
         });
       });
 
@@ -144,7 +144,7 @@ export class ClassSelectScene extends Phaser.Scene {
     this.confirmBtn = this.add.rectangle(width / 2, btnY, 320, 44, 0x2a1a3e, 1)
       .setStrokeStyle(3, 0xa855f7, 1).setInteractive({ useHandCursor: true });
     this.confirmTxt = this.add.text(width / 2, btnY, `[ BEGIN AS ${cfg.name.toUpperCase()} ]`, {
-      fontFamily: '"Press Start 2P"', fontSize: '11px', color: '#a855f7'
+      fontFamily: 'Inter, sans-serif', fontSize: '16px', color: '#a855f7'
     }).setOrigin(0.5);
 
     this.confirmBtn.on('pointerover', () => {

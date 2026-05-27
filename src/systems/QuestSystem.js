@@ -179,11 +179,11 @@ export class QuestSystem {
     const bg = s.add.rectangle(640, 120, 450, 60, 0x111122, 0.92)
       .setStrokeStyle(2, 0xa855f7, 0.8).setDepth(200).setScrollFactor(0).setAlpha(0);
     const t1 = s.add.text(640, 107, title, {
-      fontFamily: '"Press Start 2P"', fontSize: '10px', color: '#ffdd44',
+      fontFamily: 'Inter, sans-serif', fontSize: '15px', color: '#ffdd44',
       stroke: '#000000', strokeThickness: 2
     }).setOrigin(0.5).setDepth(201).setScrollFactor(0).setAlpha(0);
     const t2 = s.add.text(640, 130, desc, {
-      fontFamily: 'Inter', fontSize: '11px', color: '#cccccc'
+      fontFamily: 'Inter', fontSize: '16px', color: '#cccccc'
     }).setOrigin(0.5).setDepth(201).setScrollFactor(0).setAlpha(0);
 
     s.tweens.add({ targets: [bg, t1, t2], alpha: 1, y: '-=10', duration: 400 });
@@ -200,7 +200,7 @@ export class QuestSystem {
     const bg = s.add.rectangle(cx, cy, 620, 120, 0x111122, 0.95)
       .setStrokeStyle(2, 0xa855f7, 0.8).setDepth(200).setScrollFactor(0);
     const name = s.add.text(cx - 290, cy - 45, dlg.speaker, {
-      fontFamily: '"Press Start 2P"', fontSize: '9px', color: '#a855f7'
+      fontFamily: 'Inter, sans-serif', fontSize: '13px', color: '#a855f7'
     }).setDepth(201).setScrollFactor(0);
     const txt = s.add.text(cx - 290, cy - 20, dlg.text, {
       fontFamily: 'Inter', fontSize: '13px', color: '#e0d0b0',
@@ -215,10 +215,10 @@ export class QuestSystem {
     this.trackerBg = s.add.rectangle(1170, 460, 200, 80, 0x0a0a1a, 0.7)
       .setStrokeStyle(1, 0x4444aa, 0.4).setDepth(99).setScrollFactor(0);
     this.trackerTitle = s.add.text(1080, 430, '📜 QUEST', {
-      fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#a855f7'
+      fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#a855f7'
     }).setDepth(100).setScrollFactor(0);
     this.trackerText = s.add.text(1080, 445, '', {
-      fontFamily: 'Inter', fontSize: '10px', color: '#e0d0b0',
+      fontFamily: 'Inter', fontSize: '15px', color: '#e0d0b0',
       wordWrap: { width: 180 }, lineSpacing: 3
     }).setDepth(100).setScrollFactor(0);
     this._updateTracker();
@@ -249,10 +249,10 @@ export class QuestSystem {
     const bg = s.add.rectangle(cx, cy, 700, 500, 0x0a0a1a, 0.95)
       .setStrokeStyle(2, 0xa855f7, 0.8).setDepth(300).setScrollFactor(0);
     const title = s.add.text(cx, cy - 230, '📜 QUEST JOURNAL — The Shattered Codex', {
-      fontFamily: '"Press Start 2P"', fontSize: '11px', color: '#ffdd44'
+      fontFamily: 'Inter, sans-serif', fontSize: '16px', color: '#ffdd44'
     }).setOrigin(0.5).setDepth(301).setScrollFactor(0);
     const close = s.add.text(cx + 330, cy - 230, '[J] Close', {
-      fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#888899'
+      fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#888899'
     }).setOrigin(1, 0.5).setDepth(301).setScrollFactor(0);
 
     this.journalElements.push(bg, title, close);
@@ -265,25 +265,25 @@ export class QuestSystem {
       const color = isDone ? '#44ff44' : isActive ? '#ffdd44' : '#555566';
 
       const line = s.add.text(cx - 320, y, `${status} Ch.${q.chapter} — ${q.title}`, {
-        fontFamily: '"Press Start 2P"', fontSize: '8px', color
+        fontFamily: 'Inter, sans-serif', fontSize: '12px', color
       }).setDepth(301).setScrollFactor(0);
 
       const desc = s.add.text(cx - 300, y + 18, q.desc, {
-        fontFamily: 'Inter', fontSize: '10px', color: '#999999',
+        fontFamily: 'Inter', fontSize: '15px', color: '#999999',
         wordWrap: { width: 500 }
       }).setDepth(301).setScrollFactor(0);
 
       if (isActive) {
         const prog = this.progress[q.id] || 0;
         const pText = s.add.text(cx + 280, y, `${prog}/${q.required}`, {
-          fontFamily: '"Press Start 2P"', fontSize: '8px', color: '#ffaa44'
+          fontFamily: 'Inter, sans-serif', fontSize: '12px', color: '#ffaa44'
         }).setOrigin(1, 0).setDepth(301).setScrollFactor(0);
         this.journalElements.push(pText);
       }
 
       if (isDone) {
         const reward = s.add.text(cx + 280, y, `+${q.xp}XP +${q.gold}G`, {
-          fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#44ff44'
+          fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#44ff44'
         }).setOrigin(1, 0).setDepth(301).setScrollFactor(0);
         this.journalElements.push(reward);
       }

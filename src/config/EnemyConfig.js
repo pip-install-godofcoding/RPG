@@ -37,6 +37,18 @@ export const ENEMY_CONFIG = {
     attackRange: 150, attackCooldown: 2000, xp: 500, goldMin: 100, goldMax: 200,
     zones: ['boss_arena'], respawnTime: 120000, behavior: 'boss', isBoss: true,
     sprite: 'dragon'
+  },
+  slime_king: {
+    name: 'Slime King', hp: 300, damage: 25, speed: 50, aggroRange: 250,
+    attackRange: 80, attackCooldown: 2000, xp: 300, goldMin: 50, goldMax: 100,
+    zones: ['oakhaven_boss'], respawnTime: 120000, behavior: 'boss', isBoss: true,
+    sprite: 'slime_king'
+  },
+  frost_colossus: {
+    name: 'Frost Colossus', hp: 400, damage: 35, speed: 40, aggroRange: 250,
+    attackRange: 100, attackCooldown: 2500, xp: 400, goldMin: 80, goldMax: 150,
+    zones: ['frostpeak_boss'], respawnTime: 120000, behavior: 'boss', isBoss: true,
+    sprite: 'frost_colossus'
   }
 };
 
@@ -46,6 +58,10 @@ export const SPAWN_CONFIG = {
   crystal_caves: [{ type: 'crystal_golem', count: 4 }],
   dragons_lair: [{ type: 'fire_imp', count: 5 }],
   boss_arena: [{ type: 'dragon', count: 1 }],
+  oakhaven_village: [],
+  oakhaven_boss: [{ type: 'slime_king', count: 1 }],
+  frostpeak_village: [],
+  frostpeak_boss: [{ type: 'frost_colossus', count: 1 }],
   guild_citadel: [],
   marketplace: []
 };

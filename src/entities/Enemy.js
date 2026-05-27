@@ -38,13 +38,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     // Name tag (bigger, with stroke for readability)
     this.nameTag = scene.add.text(x, y - 30, config.name, {
-      fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#ff8888',
+      fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#ff8888',
       stroke: '#000000', strokeThickness: 3
     }).setOrigin(0.5).setDepth(10);
 
     // Level indicator
     this.lvlTag = scene.add.text(x, y - 22, `LV${Math.ceil(config.hp/30)}`, {
-      fontFamily: '"Press Start 2P"', fontSize: '5px', color: '#ffaa44',
+      fontFamily: 'Inter, sans-serif', fontSize: '7px', color: '#ffaa44',
       stroke: '#000000', strokeThickness: 2
     }).setOrigin(0.5).setDepth(10);
 
@@ -147,11 +147,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   _attack() {
-    if (!this.target) return;
-    const dmg = this.target.takeDamage(this.config.damage);
-    if (dmg) {
-      this.scene.events.emit('enemyAttacked', { enemy: this, damage: dmg });
-    }
+    if (!this.target || this.inBattle) return;
+    // Turn-based battles are now used, so overworld attacks don't deal damage directly.
+    // The collision in GameScene will trigger the BattleScene.
   }
 
   takeDamage(amount, attacker) {

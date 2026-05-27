@@ -49,7 +49,7 @@ export class TitleScene extends Phaser.Scene {
 
     // Title text
     const title = this.add.text(width / 2, height / 2 - 100, 'REALM OF\nASHENVEIL', {
-      fontFamily: '"Press Start 2P"', fontSize: '36px', color: '#e0d0b0',
+      fontFamily: 'Inter, sans-serif', fontSize: '36px', color: '#e0d0b0',
       align: 'center', lineSpacing: 12,
       stroke: '#2a1a3e', strokeThickness: 4
     }).setOrigin(0.5);
@@ -57,7 +57,7 @@ export class TitleScene extends Phaser.Scene {
 
     // Subtitle
     this.add.text(width / 2, height / 2 - 20, '— The Shattered Codex —', {
-      fontFamily: '"Press Start 2P"', fontSize: '10px', color: '#a855f7'
+      fontFamily: 'Inter, sans-serif', fontSize: '15px', color: '#a855f7'
     }).setOrigin(0.5);
 
     // Decorative line
@@ -65,12 +65,12 @@ export class TitleScene extends Phaser.Scene {
 
     // Version
     this.add.text(width / 2, height - 40, 'v1.0 — A DBMS RPG Experience', {
-      fontFamily: 'Inter', fontSize: '11px', color: '#555566'
+      fontFamily: 'Inter', fontSize: '16px', color: '#555566'
     }).setOrigin(0.5);
 
     // Start prompt
     const prompt = this.add.text(width / 2, height / 2 + 80, '[ PRESS ENTER TO BEGIN ]', {
-      fontFamily: '"Press Start 2P"', fontSize: '12px', color: '#e0d0b0'
+      fontFamily: 'Inter, sans-serif', fontSize: '18px', color: '#e0d0b0'
     }).setOrigin(0.5);
     this.tweens.add({ targets: prompt, alpha: 0.3, duration: 1200, yoyo: true, repeat: -1 });
 
@@ -79,7 +79,7 @@ export class TitleScene extends Phaser.Scene {
     this.selectedIdx = 0;
     this.menuItems = opts.map((text, i) => {
       const t = this.add.text(width / 2, height / 2 + 140 + i * 35, text, {
-        fontFamily: '"Press Start 2P"', fontSize: '11px',
+        fontFamily: 'Inter, sans-serif', fontSize: '16px',
         color: i === 0 ? '#a855f7' : '#666677'
       }).setOrigin(0.5).setInteractive();
       t.on('pointerover', () => { this.selectedIdx = i; this._updateMenu(); });

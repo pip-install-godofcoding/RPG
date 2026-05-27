@@ -55,12 +55,17 @@ export class WorldBuilder {
       }
     }
 
-    // Border walls
+    const midX = zone.x + Math.floor(zone.w / 2);
+    const midY = zone.y + Math.floor(zone.h / 2);
+
+    // Border walls (leaving a 6-tile gap in the middle for entrances)
     for (let x = zone.x; x < zone.x + zone.w; x++) {
+      if (Math.abs(x - midX) <= 3) continue;
       this._placeWall(x, zone.y);
       this._placeWall(x, zone.y + zone.h - 1);
     }
     for (let y = zone.y; y < zone.y + zone.h; y++) {
+      if (Math.abs(y - midY) <= 3) continue;
       this._placeWall(zone.x, y);
       this._placeWall(zone.x + zone.w - 1, y);
     }
@@ -68,8 +73,7 @@ export class WorldBuilder {
     // Zone-specific features
     this._addZoneFeatures(key, zone, accentTile);
 
-    // Entrance gaps (remove some wall segments)
-    this._addEntrances(key, zone);
+    // Entrance gaps are now handled inherently in the border walls loop above
 
     // Zone transition trigger
     const triggerRect = this.scene.add.rectangle(
@@ -161,6 +165,44 @@ export class WorldBuilder {
           this._placeWall(tx, ty);
         }
         break;
+      case 'oakhaven_village':
+        this._placeBuildings(zone, rng, 5);
+        for (let i = 0; i < 15; i++) {
+          const tx = zone.x + 2 + rng.between(0, zone.w - 4);
+          const ty = zone.y + 2 + rng.between(0, zone.h - 4);
+          this._placeTree(tx, ty);
+        }
+        break;
+      case 'oakhaven_boss':
+        for (let i = 0; i < 6; i++) {
+          const tx = zone.x + 2 + rng.between(0, zone.w - 4);
+          const ty = zone.y + 2 + rng.between(0, zone.h - 4);
+          this._placeTree(tx, ty);
+        }
+        break;
+      case 'frostpeak_village':
+        this._placeBuildings(zone, rng, 4);
+        for (let i = 0; i < 8; i++) {
+          const tx = zone.x + 2 + rng.between(0, zone.w - 4);
+          const ty = zone.y + 2 + rng.between(0, zone.h - 4);
+          const px = tx * TILE_SIZE + 16;
+          const py = ty * TILE_SIZE + 16;
+          this.scene.add.image(px, py, 'tile_crystal').setDepth(1).setAlpha(0.6).setTint(0x88ccff);
+        }
+        break;
+      case 'frostpeak_boss':
+        for (let i = 0; i < 12; i++) {
+          const angle = (i / 12) * Math.PI * 2;
+          const tx = zone.x + Math.floor(zone.w / 2) + Math.floor(Math.cos(angle) * 6);
+          const ty = zone.y + Math.floor(zone.h / 2) + Math.floor(Math.sin(angle) * 5);
+          const px = tx * TILE_SIZE + 16;
+          const py = ty * TILE_SIZE + 16;
+          this.scene.add.image(px, py, 'tile_crystal').setDepth(1).setTint(0x88ccff);
+          const body = this.scene.add.rectangle(px, py, TILE_SIZE, TILE_SIZE, 0, 0);
+          this.scene.physics.add.existing(body, true);
+          this.collisionBodies.add(body);
+        }
+        break;
     }
   }
 
@@ -186,30 +228,7 @@ export class WorldBuilder {
     }
   }
 
-  _addEntrances(key, zone) {
-    // Remove some border walls to create entrances
-    const midX = zone.x + Math.floor(zone.w / 2);
-    const midY = zone.y + Math.floor(zone.h / 2);
-
-    // Each zone gets openings on 2-4 sides
-    const entrancePositions = [
-      { x: midX, y: zone.y },          // top
-      { x: midX, y: zone.y + zone.h - 1 }, // bottom
-      { x: zone.x, y: midY },          // left
-      { x: zone.x + zone.w - 1, y: midY }  // right
-    ];
-
-    entrancePositions.forEach(pos => {
-      // Remove collision bodies near entrance
-      const px = pos.x * TILE_SIZE + 16;
-      const py = pos.y * TILE_SIZE + 16;
-      this.collisionBodies.getChildren().forEach(body => {
-        if (Math.abs(body.x - px) < TILE_SIZE * 2 && Math.abs(body.y - py) < TILE_SIZE * 2) {
-          body.destroy();
-        }
-      });
-    });
-  }
+  // _addEntrances removed because we natively skip walls during generation
 
   _fillEmpty() {
     // Place water tiles for areas outside zones - just set world bounds instead

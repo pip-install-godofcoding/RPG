@@ -82,11 +82,11 @@ export class DBMSMode {
       .setStrokeStyle(2, 0xff8800, 0.5).setDepth(295).setScrollFactor(0);
 
     this.panelTitle = s.add.text(22, 268, '📊 LIVE SQL QUERY LOG', {
-      fontFamily: '"Press Start 2P"', fontSize: '7px', color: '#ff8800'
+      fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#ff8800'
     }).setDepth(296).setScrollFactor(0);
 
     this.panelHint = s.add.text(310, 268, 'LIVE', {
-      fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#44ff44'
+      fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#44ff44'
     }).setOrigin(1, 0).setDepth(296).setScrollFactor(0);
 
     // Blinking dot
@@ -102,7 +102,7 @@ export class DBMSMode {
     s.add.rectangle(640, 12, 560, 20, 0x1a0f00, 0.9)
       .setStrokeStyle(1, 0xff8800, 0.5).setDepth(300).setScrollFactor(0);
     s.add.text(640, 12, '🗄 DBMS MODE  |  [TAB] Schema  |  [C] Concepts  |  [B] Sandbox  |  [J] Quests', {
-      fontFamily: '"Press Start 2P"', fontSize: '5px', color: '#ff8800'
+      fontFamily: 'Inter, sans-serif', fontSize: '7px', color: '#ff8800'
     }).setOrigin(0.5).setDepth(301).setScrollFactor(0);
   }
 
@@ -150,21 +150,21 @@ export class DBMSMode {
 
     // Type + timestamp header
     const header = s.add.text(22, baseY - 38, `[${type}]  ${time}`, {
-      fontFamily: '"Press Start 2P"', fontSize: '7px', color: badgeColor
+      fontFamily: 'Inter, sans-serif', fontSize: '10px', color: badgeColor
     }).setDepth(297).setScrollFactor(0);
     els.push(header);
 
     // Concept tag if applicable
     if (concept && CONCEPTS[concept]) {
       const tag = s.add.text(320, baseY - 38, CONCEPTS[concept].title, {
-        fontFamily: '"Press Start 2P"', fontSize: '5px', color: CONCEPTS[concept].color
+        fontFamily: 'Inter, sans-serif', fontSize: '7px', color: CONCEPTS[concept].color
       }).setOrigin(1, 0).setDepth(297).setScrollFactor(0);
       els.push(tag);
     }
 
     // SQL text (the main content — large and readable)
     const sqlText = s.add.text(26, baseY - 24, sql, {
-      fontFamily: '"Courier New", monospace', fontSize: '9px', color: '#44ee66',
+      fontFamily: '"Courier New", monospace', fontSize: '13px', color: '#44ee66',
       wordWrap: { width: 295 }, lineSpacing: 2
     }).setDepth(297).setScrollFactor(0);
     els.push(sqlText);
@@ -172,10 +172,10 @@ export class DBMSMode {
     // Result indicator
     const isReal = this.supabase !== null;
     const indicator = s.add.text(24, baseY + 32, isReal ? '✅ EXECUTED' : '📝 SIMULATED', {
-      fontFamily: '"Press Start 2P"', fontSize: '5px', color: isReal ? '#44ff44' : '#666677'
+      fontFamily: 'Inter, sans-serif', fontSize: '7px', color: isReal ? '#44ff44' : '#666677'
     }).setDepth(297).setScrollFactor(0);
     const expandHint = s.add.text(320, baseY + 32, '▸ expand', {
-      fontFamily: '"Courier New", monospace', fontSize: '9px', color: '#445566'
+      fontFamily: '"Courier New", monospace', fontSize: '13px', color: '#445566'
     }).setOrigin(1, 0).setDepth(297).setScrollFactor(0);
     els.push(indicator, expandHint);
 
@@ -200,17 +200,17 @@ export class DBMSMode {
     if (this.conceptPopup) { this.conceptPopup.forEach(e => e.destroy()); }
 
     const els = [];
-    const bg = s.add.rectangle(640, 685, 750, 55, 0x0a0a1a, 0.96)
+    const bg = s.add.rectangle(640, 675, 750, 75, 0x0a0a1a, 0.96)
       .setStrokeStyle(2, Phaser.Display.Color.HexStringToColor(c.color).color, 0.9)
       .setDepth(350).setScrollFactor(0);
-    const icon = s.add.text(280, 670, '🆕 CONCEPT UNLOCKED:', {
-      fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#ffdd44'
+    const icon = s.add.text(280, 650, '🆕 CONCEPT UNLOCKED:', {
+      fontFamily: 'Inter, sans-serif', fontSize: '15px', color: '#ffdd44'
     }).setDepth(351).setScrollFactor(0);
-    const title = s.add.text(480, 670, c.title, {
-      fontFamily: '"Press Start 2P"', fontSize: '8px', color: c.color
+    const title = s.add.text(500, 650, c.title, {
+      fontFamily: 'Inter, sans-serif', fontSize: '18px', color: c.color
     }).setDepth(351).setScrollFactor(0);
-    const desc = s.add.text(280, 688, c.desc.replace('\n', ' | '), {
-      fontFamily: 'Inter', fontSize: '10px', color: '#cccccc',
+    const desc = s.add.text(280, 675, c.desc.replace('\n', ' | '), {
+      fontFamily: 'Inter', fontSize: '14px', color: '#cccccc',
       wordWrap: { width: 700 }
     }).setDepth(351).setScrollFactor(0);
 
@@ -443,7 +443,7 @@ export class DBMSMode {
     els.push(modal);
 
     const headerTxt = s.add.text(cx, cy - 215, `[${type}]  ${time}`, {
-      fontFamily: '"Press Start 2P"', fontSize: '9px', color
+      fontFamily: 'Inter, sans-serif', fontSize: '13px', color
     }).setOrigin(0.5, 0).setDepth(502).setScrollFactor(0);
     els.push(headerTxt);
 
@@ -457,17 +457,17 @@ export class DBMSMode {
       const c = CONCEPTS[concept];
       const divider = s.add.rectangle(cx, cy + 130, 680, 1, 0x333355, 1).setDepth(502).setScrollFactor(0);
       const cTitle = s.add.text(cx, cy + 142, c.title, {
-        fontFamily: '"Press Start 2P"', fontSize: '7px', color: c.color
+        fontFamily: 'Inter, sans-serif', fontSize: '10px', color: c.color
       }).setOrigin(0.5, 0).setDepth(502).setScrollFactor(0);
       const cDesc = s.add.text(cx, cy + 162, c.desc.replace('\n', ' | '), {
-        fontFamily: '"Courier New", monospace', fontSize: '11px', color: '#aaaacc',
+        fontFamily: '"Courier New", monospace', fontSize: '16px', color: '#aaaacc',
         wordWrap: { width: 680 }, align: 'center'
       }).setOrigin(0.5, 0).setDepth(502).setScrollFactor(0);
       els.push(divider, cTitle, cDesc);
     }
 
     const closeTxt = s.add.text(cx, cy + 215, '[ CLICK ANYWHERE TO CLOSE ]', {
-      fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#333355'
+      fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#333355'
     }).setOrigin(0.5, 1).setDepth(502).setScrollFactor(0);
     els.push(closeTxt);
 
@@ -489,13 +489,13 @@ export class DBMSMode {
     const bg = s.add.rectangle(cx, 360, 800, 550, 0x08080f, 0.97)
       .setStrokeStyle(2, 0x44aaff, 0.8).setDepth(400).setScrollFactor(0);
     const t = s.add.text(cx, 100, '📚  DBMS CONCEPTS ENCYCLOPEDIA', {
-      fontFamily: '"Press Start 2P"', fontSize: '10px', color: '#44aaff'
+      fontFamily: 'Inter, sans-serif', fontSize: '15px', color: '#44aaff'
     }).setOrigin(0.5).setDepth(401).setScrollFactor(0);
     const counter = s.add.text(1010, 100, `${this.conceptsSeen.size}/${Object.keys(CONCEPTS).length} Discovered`, {
-      fontFamily: '"Press Start 2P"', fontSize: '6px', color: '#44aaff'
+      fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#44aaff'
     }).setOrigin(1, 0.5).setDepth(401).setScrollFactor(0);
     const cl = s.add.text(1010, 115, '[C] Close', {
-      fontFamily: '"Press Start 2P"', fontSize: '5px', color: '#666'
+      fontFamily: 'Inter, sans-serif', fontSize: '7px', color: '#666'
     }).setOrigin(1, 0).setDepth(401).setScrollFactor(0);
     this.elements.push(bg, t, counter, cl);
 
@@ -505,11 +505,11 @@ export class DBMSMode {
       const icon = seen ? '✅' : '🔒';
 
       const nm = s.add.text(260, y, `${icon}  ${c.title}`, {
-        fontFamily: '"Press Start 2P"', fontSize: '7px', color: seen ? c.color : '#333344'
+        fontFamily: 'Inter, sans-serif', fontSize: '10px', color: seen ? c.color : '#333344'
       }).setDepth(401).setScrollFactor(0);
 
       const d = s.add.text(262, y + 16, seen ? c.desc.replace('\n', ' ') : '[ Play the game to unlock this concept ]', {
-        fontFamily: 'Inter', fontSize: '9px', color: seen ? '#bbbbbb' : '#333344',
+        fontFamily: 'Inter', fontSize: '13px', color: seen ? '#bbbbbb' : '#333344',
         wordWrap: { width: 720 }
       }).setDepth(401).setScrollFactor(0);
 
