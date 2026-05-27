@@ -191,74 +191,82 @@ export class PvPSystem {
     const oppBarColor = oppPct > 50 ? '#44cc44' : oppPct > 25 ? '#ffcc44' : '#cc4444';
 
     const html = `
-      <div id="pvp-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9000;
-           display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;">
-        <div style="background:linear-gradient(135deg,#0d0505,#1a0808);border:2px solid #cc4444;
-             border-radius:16px;padding:26px;width:580px;
-             box-shadow:0 0 60px rgba(204,68,68,0.35);">
+      <style>
+        .pvp-ab { transition:all 0.15s; font-family:'Segoe UI',Arial,sans-serif; cursor:pointer; }
+        .pvp-ab:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(255,204,68,0.2); border-color:#ffcc44 !important; }
+        .pvp-ab:disabled { opacity:0.35; cursor:not-allowed !important; transform:none !important; }
+      </style>
+      <div id="pvp-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9000;
+           display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',Arial,sans-serif;">
+        <div style="background:linear-gradient(135deg,#0a0a14,#11111a);border:2px solid #3344aa;
+             border-radius:16px;padding:26px;width:640px;
+             box-shadow:0 0 60px rgba(50,68,170,0.35);">
 
           <div style="text-align:center;margin-bottom:18px;">
-            <div style="font-size:18px;font-weight:700;color:#ff6666;">⚔ PvP Combat — Round ${s.round}</div>
-            <div style="font-size:11px;color:#777;margin-top:3px;">${s.myTurn ? 'YOUR TURN' : `${s.oppName}'s TURN…`}</div>
+            <div style="font-size:20px;font-weight:700;color:#ddeeff;">⚔ PvP Combat — Round ${s.round}</div>
+            <div style="font-size:12px;color:#8899bb;margin-top:4px;">${s.myTurn ? 'YOUR TURN' : `${s.oppName}'s TURN…`}</div>
           </div>
 
           <!-- HP Bars -->
           <div style="display:flex;gap:16px;margin-bottom:16px;">
-            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid #333;border-radius:8px;padding:10px;">
-              <div style="font-size:12px;font-weight:700;color:#88aaff;margin-bottom:6px;">
-                ⚔ ${window.ASHENVEIL.username}
+            <div style="flex:1;background:rgba(10,10,25,0.88);border:2px solid #3344aa;border-radius:12px;padding:12px;">
+              <div style="font-size:14px;font-weight:700;color:#ddeeff;margin-bottom:8px;">
+                ${window.ASHENVEIL.username} <span style="font-size:10px;color:#8899bb;font-weight:600;">(You)</span>
               </div>
-              <div style="font-size:11px;color:#aaa;margin-bottom:4px;">${s.myHP}/${s.myMaxHP} HP</div>
-              <div style="background:#1a1a1a;border-radius:4px;height:8px;overflow:hidden;">
-                <div style="width:${myPct}%;height:100%;background:${myBarColor};transition:width 0.4s;border-radius:4px;"></div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:11px;font-weight:700;color:#44ff88;width:22px;">HP</span>
+                <div style="flex:1;background:#111;border-radius:6px;height:12px;overflow:hidden;border:1px solid #222;">
+                  <div style="width:${myPct}%;height:100%;background:${myBarColor};transition:width 0.4s;border-radius:6px;"></div>
+                </div>
+                <span style="font-size:11px;color:#88ffaa;min-width:60px;text-align:right;">${s.myHP}/${s.myMaxHP}</span>
               </div>
             </div>
-            <div style="display:flex;align-items:center;font-size:20px;color:#cc4444;font-weight:700;">VS</div>
-            <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid #333;border-radius:8px;padding:10px;">
-              <div style="font-size:12px;font-weight:700;color:#ffaa88;margin-bottom:6px;">
-                ⚔ ${s.oppName}
+            <div style="display:flex;align-items:center;font-size:24px;color:#cc4444;font-weight:700;font-style:italic;">VS</div>
+            <div style="flex:1;background:rgba(25,10,10,0.88);border:2px solid #aa3333;border-radius:12px;padding:12px;">
+              <div style="font-size:14px;font-weight:700;color:#ffdddd;margin-bottom:8px;">
+                ${s.oppName}
               </div>
-              <div style="font-size:11px;color:#aaa;margin-bottom:4px;">${s.oppHP}/${s.oppMaxHP} HP</div>
-              <div style="background:#1a1a1a;border-radius:4px;height:8px;overflow:hidden;">
-                <div style="width:${oppPct}%;height:100%;background:${oppBarColor};transition:width 0.4s;border-radius:4px;"></div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:11px;font-weight:700;color:#ff5555;width:22px;">HP</span>
+                <div style="flex:1;background:#111;border-radius:6px;height:12px;overflow:hidden;border:1px solid #222;">
+                  <div style="width:${oppPct}%;height:100%;background:${oppBarColor};transition:width 0.4s;border-radius:6px;"></div>
+                </div>
+                <span style="font-size:11px;color:#ff8888;min-width:60px;text-align:right;">${s.oppHP}/${s.oppMaxHP}</span>
               </div>
             </div>
           </div>
 
           <!-- Live SQL Panel -->
-          <div style="background:rgba(0,15,0,0.9);border:1px solid #00cc44;border-radius:6px;
+          <div style="background:rgba(5,15,5,0.92);border:1px solid #00cc44;border-radius:6px;
                padding:8px 12px;margin-bottom:14px;font-family:'Courier New',monospace;font-size:10px;color:#00ff44;">
-            <div style="color:#ffaa00;font-weight:bold;margin-bottom:3px;">⚡ LIVE SQL — PvP Transaction</div>
+            <div style="color:#ffaa00;font-weight:bold;margin-bottom:4px;border-bottom:1px solid #224422;padding-bottom:3px;">⚡ LIVE SQL — PvP Transaction</div>
             <div id="pvp-sql" style="white-space:pre-wrap;word-break:break-all;max-height:65px;overflow-y:auto;line-height:1.4;">-- Combat in progress…</div>
           </div>
 
           <!-- Combat log -->
-          <div id="pvp-log" style="background:rgba(0,0,0,0.4);border:1px solid #333;border-radius:6px;
-               padding:8px 12px;margin-bottom:14px;font-size:12px;color:#ccc;
-               max-height:80px;overflow-y:auto;min-height:40px;">
-            <div style="color:#888;">⚔ Battle started! ${s.myTurn ? 'You go first.' : `${s.oppName} goes first.`}</div>
+          <div id="pvp-log" style="background:rgba(10,10,15,0.8);border:1px solid #2a2a4a;border-radius:8px;
+               padding:10px 14px;margin-bottom:16px;font-size:13px;color:#ccc;
+               max-height:90px;overflow-y:auto;min-height:50px;">
+            <div style="color:#88aaff;">⚔ Battle started! ${s.myTurn ? 'You go first.' : `${s.oppName} goes first.`}</div>
           </div>
 
           <!-- Action Buttons -->
-          <div style="display:flex;gap:8px;justify-content:center;">
+          <div style="display:flex;gap:12px;justify-content:center;">
             ${s.myTurn ? `
-              <button onclick="window._pvpSystem.pvpAttack('strike')"
-                style="padding:10px 22px;background:rgba(200,80,50,0.2);border:2px solid #cc5544;
-                       border-radius:8px;color:#ff8866;font-weight:700;font-size:13px;cursor:pointer;font-family:Inter;">
-                ⚔ Strike
+              <button class="pvp-ab" onclick="window._pvpSystem.pvpAttack('strike')"
+                style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border:2px solid #2a2a4a;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;font-size:14px;">
+                <span style="color:#ffcc44;">[1]</span> Strike
               </button>
-              <button onclick="window._pvpSystem.pvpAttack('heavy')"
-                style="padding:10px 22px;background:rgba(200,150,50,0.2);border:2px solid #ccaa33;
-                       border-radius:8px;color:#ffdd66;font-weight:700;font-size:13px;cursor:pointer;font-family:Inter;">
-                💥 Heavy Hit
+              <button class="pvp-ab" onclick="window._pvpSystem.pvpAttack('heavy')"
+                style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border:2px solid #2a2a4a;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;font-size:14px;">
+                <span style="color:#ffcc44;">[2]</span> Heavy Hit
               </button>
-              <button onclick="window._pvpSystem.pvpAttack('defend')"
-                style="padding:10px 22px;background:rgba(50,100,200,0.2);border:2px solid #4477cc;
-                       border-radius:8px;color:#88aaff;font-weight:700;font-size:13px;cursor:pointer;font-family:Inter;">
-                🛡 Defend
+              <button class="pvp-ab" onclick="window._pvpSystem.pvpAttack('defend')"
+                style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border:2px solid #2a2a4a;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;font-size:14px;">
+                <span style="color:#ffcc44;">[3]</span> Defend
               </button>
             ` : `
-              <div style="padding:10px 22px;color:#666;font-size:13px;">Waiting for ${s.oppName}…</div>
+              <div style="padding:10px 22px;color:#8899bb;font-size:14px;font-weight:600;">Waiting for ${s.oppName}…</div>
             `}
           </div>
         </div>

@@ -212,13 +212,13 @@ export class QuestSystem {
 
   _createTracker() {
     const s = this.scene;
-    this.trackerBg = s.add.rectangle(1170, 460, 200, 80, 0x0a0a1a, 0.7)
+    this.trackerBg = s.add.rectangle(1170, 475, 200, 110, 0x0a0a1a, 0.7)
       .setStrokeStyle(1, 0x4444aa, 0.4).setDepth(99).setScrollFactor(0);
     this.trackerTitle = s.add.text(1080, 430, '📜 QUEST', {
       fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#a855f7'
     }).setDepth(100).setScrollFactor(0);
     this.trackerText = s.add.text(1080, 445, '', {
-      fontFamily: 'Inter', fontSize: '15px', color: '#e0d0b0',
+      fontFamily: 'Inter, sans-serif', fontSize: '13px', color: '#e0d0b0',
       wordWrap: { width: 180 }, lineSpacing: 3
     }).setDepth(100).setScrollFactor(0);
     this._updateTracker();
