@@ -127,7 +127,7 @@ export class GuildSystem {
           <div style="background:rgba(0,15,0,0.9);border:1px solid #00cc44;border-radius:6px;
                padding:8px 12px;margin-bottom:14px;font-family:'Courier New',monospace;font-size:10px;color:#00ff44;">
             <div style="color:#ffaa00;font-weight:bold;margin-bottom:4px;">⚡ LAST SQL EXECUTED</div>
-            <div id="guild-sql" style="white-space:pre-wrap;max-height:70px;overflow-y:auto;line-height:1.4;">SELECT g.guild_name, g.guild_tag, g.level, g.gold_bank,
+            <div id="guild-sql" style="white-space:pre-wrap;word-break:break-all;max-height:70px;overflow-y:auto;line-height:1.4;">SELECT g.guild_name, g.guild_tag, g.level, g.gold_bank,
   COUNT(p.player_id) AS member_count
 FROM guilds g
 LEFT JOIN players p ON g.guild_id = p.guild_id

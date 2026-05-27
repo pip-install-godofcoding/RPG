@@ -106,7 +106,7 @@ export class BattleScene extends Phaser.Scene {
       <div id="battle-dbms" style="
         background:rgba(5,15,5,0.92); border:1px solid #00cc44; border-radius:6px;
         padding:5px 10px; font-family:'Courier New',monospace; font-size:10px;
-        color:#00ff44; height:55px; overflow-y:hidden; margin-top:6px; transition: height 0.2s ease;">
+        color:#00ff44; height:55px; overflow-y:hidden; margin-top:6px; transition: height 0.2s ease; word-break: break-all;">
         <div id="battle-dbms-header" style="color:#ffaa00;font-weight:bold;border-bottom:1px solid #224422;margin-bottom:5px;padding-bottom:3px;cursor:pointer;display:flex;justify-content:space-between;">
           <span>⚡ LIVE SQL</span>
           <span id="battle-dbms-icon">▼</span>

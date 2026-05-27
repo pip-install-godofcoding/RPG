@@ -214,6 +214,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   _respawn() {
     this.hp = this.maxHp;
     this.isDead = false;
+    this.inBattle = false; // Fix: reset battle state on respawn
     this.state = 'idle';
     this.stateTimer = 2000;
     this.setPosition(this.spawnX, this.spawnY);

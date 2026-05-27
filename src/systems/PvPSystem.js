@@ -229,7 +229,7 @@ export class PvPSystem {
           <div style="background:rgba(0,15,0,0.9);border:1px solid #00cc44;border-radius:6px;
                padding:8px 12px;margin-bottom:14px;font-family:'Courier New',monospace;font-size:10px;color:#00ff44;">
             <div style="color:#ffaa00;font-weight:bold;margin-bottom:3px;">⚡ LIVE SQL — PvP Transaction</div>
-            <div id="pvp-sql" style="white-space:pre-wrap;max-height:65px;overflow-y:auto;line-height:1.4;">-- Combat in progress…</div>
+            <div id="pvp-sql" style="white-space:pre-wrap;word-break:break-all;max-height:65px;overflow-y:auto;line-height:1.4;">-- Combat in progress…</div>
           </div>
 
           <!-- Combat log -->

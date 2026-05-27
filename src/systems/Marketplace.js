@@ -110,7 +110,7 @@ export class Marketplace {
           <div style="background:rgba(0,15,0,0.9);border:1px solid #00cc44;border-radius:6px;
                padding:8px 12px;margin-bottom:14px;font-family:'Courier New',monospace;font-size:10px;color:#00ff44;">
             <div style="color:#ffaa00;font-weight:bold;margin-bottom:4px;">⚡ LIVE SQL — NPC Transaction Log</div>
-            <div id="market-sql" style="white-space:pre-wrap;max-height:70px;overflow-y:auto;line-height:1.4;">SELECT i.name, it.type_name, r.rarity_name, r.color_code,
+            <div id="market-sql" style="white-space:pre-wrap;word-break:break-all;max-height:70px;overflow-y:auto;line-height:1.4;">SELECT i.name, it.type_name, r.rarity_name, r.color_code,
   i.attack_bonus, i.defense_bonus, i.sell_price
 FROM items i
 JOIN item_types it ON i.type_id = it.type_id
