@@ -133,6 +133,11 @@ export class PvPSystem {
       }
     });
 
+    // Close PvE battle instantly if active — PvP takes priority
+    if (this.scene.scene.isActive('Battle')) {
+      this.scene.scene.get('Battle')._interruptForPvP();
+    }
+
     // Start combat — challenger goes first
     this._startPvPCombat(opp.from, opp.fromClass, opp.fromHP, opp.fromMaxHP, opp.fromAtk, opp.fromGold, false);
   }
@@ -153,6 +158,12 @@ export class PvPSystem {
   onChallengeAccepted(payload) {
     if (payload.target !== window.ASHENVEIL.username) return;
     clearTimeout(this._pendingTimeout);
+    
+    // Close PvE battle instantly if active — PvP takes priority
+    if (this.scene.scene.isActive('Battle')) {
+      this.scene.scene.get('Battle')._interruptForPvP();
+    }
+
     this._startPvPCombat(payload.from, null, payload.myHP, payload.myMaxHP, payload.myAtk, payload.myGold, true);
   }
 

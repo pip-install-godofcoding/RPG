@@ -523,4 +523,21 @@ export class BattleScene extends Phaser.Scene {
       this.scene.stop();
     });
   }
+
+  // Called when PvP takes priority over an active PvE battle
+  _interruptForPvP() {
+    if (this.state === 'END') return;
+    this.state = 'END';
+    // Instantly clean up UI
+    if (this._uiEl) { this._uiEl.remove(); this._uiEl = null; }
+    // Release enemy so it doesn't stay locked forever
+    if (this.enemy && !this.enemy.isDead) {
+      this.enemy.inBattle = false;
+      this.enemy.state = 'idle';
+      this.enemy.attackTimer = 4000;
+    }
+    // Resume world immediately so PvP overlay can render
+    this.gameScene.scene.resume();
+    this.scene.stop();
+  }
 }

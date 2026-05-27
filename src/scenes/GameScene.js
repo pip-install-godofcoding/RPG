@@ -125,6 +125,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   _startBattle(enemy) {
+    if (enemy.inBattle || this.scene.isPaused('GameScene') || (this.pvp && this.pvp.inPvP)) return;
     enemy.inBattle = true;
     this.player.setVelocity(0, 0);
     this.scene.pause();

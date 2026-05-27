@@ -310,9 +310,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     while (this.xp >= this.xpToNext) {
       this.xp -= this.xpToNext;
       this.level++;
-      this.stats.maxHp += 20;
-      this.stats.hp = this.stats.maxHp;
-      this.stats.attack += 2;
+      // HP scaling
+      this.stats.maxHp  += 20;
+      this.stats.hp      = this.stats.maxHp;
+      // Mana scaling (same cadence as HP)
+      this.stats.maxMana += 15;
+      this.stats.mana    = this.stats.maxMana;
+      // Attack / Defense
+      this.stats.attack  += 2;
       this.stats.defense += 1;
       this.xpToNext = this.level * 40;
       this.scene.events.emit('levelUp', this);
