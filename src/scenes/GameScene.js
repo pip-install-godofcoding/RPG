@@ -142,6 +142,11 @@ export class GameScene extends Phaser.Scene {
     if (enemy.inBattle || this.scene.isPaused('GameScene') || (this.pvp && this.pvp.inPvP)) return;
     enemy.inBattle = true;
     this.player.setVelocity(0, 0);
+
+    // Close any open UI modals before starting battle
+    if (this.marketplace?.isOpen) this.marketplace.close();
+    if (this.guildSystem?.isOpen) this.guildSystem.close();
+
     this.scene.pause();
     this.scene.launch('Battle', {
       player: this.player,
