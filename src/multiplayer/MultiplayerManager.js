@@ -79,6 +79,9 @@ export class MultiplayerManager {
       .on('broadcast', { event: 'guild_update' }, ({ payload }) => {
         this._onGuildUpdate(payload);
       })
+      .on('broadcast', { event: 'guild_chat' }, ({ payload }) => {
+        this.scene.guildSystem?.onGuildChat(payload);
+      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           await this.channel.track({
