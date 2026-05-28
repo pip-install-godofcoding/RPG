@@ -127,6 +127,7 @@ export class PvPSystem {
       type: 'broadcast', event: 'pvp_accepted',
       payload: {
         from: window.ASHENVEIL.username, target: opp.from,
+        myClass: window.ASHENVEIL.playerClass,
         myHP: this.player.stats.hp, myMaxHP: this.player.stats.maxHp,
         myLevel: this.player.level, myAtk: this.player.stats.attack || 10,
         myGold: this.player.gold,
@@ -164,7 +165,7 @@ export class PvPSystem {
       this.scene.scene.get('Battle')._interruptForPvP();
     }
 
-    this._startPvPCombat(payload.from, null, payload.myHP, payload.myMaxHP, payload.myAtk, payload.myGold, true);
+    this._startPvPCombat(payload.from, payload.myClass, payload.myHP, payload.myMaxHP, payload.myAtk, payload.myGold, true);
   }
 
   onChallengeDeclined(payload) {
