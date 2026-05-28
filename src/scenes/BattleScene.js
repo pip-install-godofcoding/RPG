@@ -123,21 +123,22 @@ export class BattleScene extends Phaser.Scene {
       .hp-fill { transition: width 0.5s ease, background-color 0.5s ease; }
 
       /* ── Mobile responsive ── */
-      @media (max-width: 600px) {
-        #battle-top-row { padding: 8px 10px !important; gap: 8px !important; }
-        #battle-top-row > div { padding: 10px 10px !important; }
-        #battle-top-row > div span[style*='font-size:15px'] { font-size: 12px !important; }
+      @media (max-width: 600px), (max-height: 500px) {
+        #battle-top-row { padding: 4px 6px !important; gap: 6px !important; }
+        #battle-top-row > div { padding: 6px 8px !important; border-width: 1px !important; }
+        #battle-top-row > div span[style*='font-size:15px'] { font-size: 11px !important; margin-bottom:4px !important; }
         #battle-top-row > div span[style*='font-size:11px'] { font-size: 9px !important; }
-        #battle-abilities { grid-template-columns: 1fr 1fr !important; gap: 5px !important; }
-        .battle-ab { padding: 7px 5px !important; }
+        #battle-abilities { grid-template-columns: 1fr 1fr !important; gap: 4px !important; }
+        .battle-ab { padding: 5px !important; border-width: 1px !important; }
         .battle-ab div:first-child span:first-child { font-size: 11px !important; }
-        #battle-msg { font-size: 12px !important; margin-bottom:5px !important; }
-        #battle-bottom { padding: 8px 10px !important; padding-bottom: max(10px, env(safe-area-inset-bottom, 8px)) !important; }
+        #battle-msg { font-size: 11px !important; margin-bottom:4px !important; }
+        #battle-dbms { display: none !important; }
+        #battle-bottom { padding: 6px !important; padding-bottom: max(6px, env(safe-area-inset-bottom, 4px)) !important; }
       }
     </style>
     <div id="battle-ui" style="
       position:fixed; inset:0; display:grid;
-      grid-template-rows: auto minmax(120px,1fr) auto;
+      grid-template-rows: auto 1fr auto;
       pointer-events:none; font-family:'Segoe UI',Arial,sans-serif;
       z-index:9990;">
 
