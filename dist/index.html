@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Realm of Ashenveil — 2D RPG</title>
+  <meta name="description" content="A dark fantasy top-down 2D RPG with multiplayer, quests, and DBMS educational mode"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0f; }
+    #game-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+    canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+    #login-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); z-index: 1000;
+      font-family: 'Press Start 2P', monospace; color: #e0d0b0;
+      flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+    }
+    #login-overlay.active { display: flex; }
+    #login-overlay input {
+      font-family: 'Press Start 2P', monospace; font-size: 14px;
+      padding: 12px 20px; background: #1a1a2e; border: 2px solid #e0d0b0;
+      color: #e0d0b0; outline: none; text-align: center; width: 300px;
+    }
+    #login-overlay button {
+      font-family: 'Press Start 2P', monospace; font-size: 12px;
+      padding: 10px 30px; background: #2a1a3e; border: 2px solid #a855f7;
+      color: #a855f7; cursor: pointer; transition: all 0.2s;
+    }
+    #login-overlay button:hover { background: #a855f7; color: #0a0a0f; }
+  </style>
+  <script type="module" crossorigin src="/assets/index-C0-3LuIV.js"></script>
+</head>
+<body>
+  <div id="game-container"></div>
+  <div id="login-overlay">
+    <div style="font-size:18px; margin-bottom:10px;">ENTER THY NAME</div>
+    <input type="text" id="username-input" maxlength="32" placeholder="Hero name..." autofocus/>
+    <button id="login-btn">ENTER THE REALM</button>
+  </div>
+</body>
+</html>

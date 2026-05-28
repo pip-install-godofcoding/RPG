@@ -206,12 +206,22 @@ export class PvPSystem {
         .pvp-ab { transition:all 0.15s; font-family:'Segoe UI',Arial,sans-serif; cursor:pointer; }
         .pvp-ab:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(255,204,68,0.2); border-color:#ffcc44 !important; }
         .pvp-ab:disabled { opacity:0.35; cursor:not-allowed !important; transform:none !important; }
+        
+        /* ── Mobile responsive ── */
+        @media (max-width: 600px) {
+          #pvp-card { width: 95vw !important; padding: 16px !important; }
+          #pvp-hp-bars { flex-direction: column !important; gap: 8px !important; }
+          #pvp-hp-bars > div:first-child, #pvp-hp-bars > div:last-child { width: 100% !important; padding: 8px !important; }
+          #pvp-hp-bars > div:nth-child(2) { display: none !important; } /* Hide the "VS" */
+          #pvp-buttons { gap: 6px !important; flex-wrap: wrap !important; }
+          .pvp-ab { padding: 8px 12px !important; font-size: 12px !important; flex: 1 1 auto; }
+        }
       </style>
       <div id="pvp-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9000;
            display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',Arial,sans-serif;">
-        <div style="background:linear-gradient(135deg,#0a0a14,#11111a);border:2px solid #3344aa;
-             border-radius:16px;padding:26px;width:640px;
-             box-shadow:0 0 60px rgba(50,68,170,0.35);">
+        <div id="pvp-card" style="background:linear-gradient(135deg,#0a0a14,#11111a);border:2px solid #3344aa;
+             border-radius:16px;padding:26px;width:640px;max-width:100%;
+             box-shadow:0 0 60px rgba(50,68,170,0.35); box-sizing: border-box;">
 
           <div style="text-align:center;margin-bottom:18px;">
             <div style="font-size:20px;font-weight:700;color:#ddeeff;">⚔ PvP Combat — Round ${s.round}</div>
@@ -219,7 +229,7 @@ export class PvPSystem {
           </div>
 
           <!-- HP Bars -->
-          <div style="display:flex;gap:16px;margin-bottom:16px;">
+          <div id="pvp-hp-bars" style="display:flex;gap:16px;margin-bottom:16px;align-items:center;">
             <div style="flex:1;background:rgba(10,10,25,0.88);border:2px solid #3344aa;border-radius:12px;padding:12px;">
               <div style="font-size:14px;font-weight:700;color:#ddeeff;margin-bottom:8px;">
                 ${window.ASHENVEIL.username} <span style="font-size:10px;color:#8899bb;font-weight:600;">(You)</span>
@@ -262,7 +272,7 @@ export class PvPSystem {
           </div>
 
           <!-- Action Buttons -->
-          <div style="display:flex;gap:12px;justify-content:center;">
+          <div id="pvp-buttons" style="display:flex;gap:12px;justify-content:center;">
             ${s.myTurn ? `
               <button class="pvp-ab" onclick="window._pvpSystem.pvpAttack('strike')"
                 style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border:2px solid #2a2a4a;border-radius:8px;padding:10px 24px;color:#fff;font-weight:700;font-size:14px;">

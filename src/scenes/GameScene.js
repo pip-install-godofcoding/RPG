@@ -21,6 +21,7 @@ import { ENEMY_CONFIG } from '../config/EnemyConfig.js';
 import { Marketplace } from '../systems/Marketplace.js';
 import { GuildSystem } from '../systems/GuildSystem.js';
 import { PvPSystem } from '../systems/PvPSystem.js';
+import { MobileControls } from '../systems/MobileControls.js';
 
 export class GameScene extends Phaser.Scene {
   constructor() { super('Game'); }
@@ -99,6 +100,9 @@ export class GameScene extends Phaser.Scene {
     this.guildSystem = new GuildSystem(this, this.player);
     // PvP wired AFTER multiplayer so it can reference the channel
     this.pvp = new PvPSystem(this, this.player, this.multiplayer);
+
+    // Mobile virtual controls (no-op on desktop)
+    this.mobileControls = new MobileControls(this);
 
     // NPC interactions (simple)
     this._createNPCs();

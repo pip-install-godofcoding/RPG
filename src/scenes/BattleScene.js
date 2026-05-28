@@ -116,18 +116,31 @@ export class BattleScene extends Phaser.Scene {
 
     const html = `
     <style>
+      .battle-ab { transition:all 0.15s; font-family:'Segoe UI',Arial,sans-serif; }
       .battle-ab:hover { border-color:#ffcc44 !important; transform:translateY(-2px); box-shadow:0 4px 16px rgba(255,204,68,0.2); }
+      .battle-ab:active { border-color:#ffcc44 !important; transform:scale(0.95); }
       .battle-ab:disabled { opacity:0.35; cursor:not-allowed !important; transform:none !important; }
       .hp-fill { transition: width 0.5s ease, background-color 0.5s ease; }
+
+      /* ── Mobile responsive ── */
+      @media (max-width: 600px) {
+        #battle-top-row { flex-direction: column !important; padding: 8px 10px !important; gap: 8px !important; }
+        #battle-top-row > div { min-width: 0 !important; width: 100% !important; }
+        #battle-abilities { grid-template-columns: 1fr 1fr !important; gap: 5px !important; }
+        .battle-ab { padding: 8px 6px !important; }
+        .battle-ab div:first-child span:first-child { font-size: 12px !important; }
+        #battle-msg { font-size: 12px !important; }
+        #battle-bottom { padding: 8px 10px 10px !important; }
+      }
     </style>
     <div id="battle-ui" style="
       position:fixed; inset:0; display:grid;
-      grid-template-rows: auto minmax(160px,1fr) auto;
+      grid-template-rows: auto minmax(120px,1fr) auto;
       pointer-events:none; font-family:'Segoe UI',Arial,sans-serif;
       z-index:9990;">
 
       <!-- TOP ROW: Stat Cards -->
-      <div style="display:flex; justify-content:space-between; align-items:flex-start;
+      <div id="battle-top-row" style="display:flex; justify-content:space-between; align-items:flex-start;
                   padding:16px 24px; gap:16px; pointer-events:none;">
 
         <!-- Player Card -->
@@ -185,7 +198,7 @@ export class BattleScene extends Phaser.Scene {
       <div></div>
 
       <!-- BOTTOM ROW: Command panel -->
-      <div style="
+      <div id="battle-bottom" style="
         background:linear-gradient(180deg,rgba(8,8,20,0.97) 0%,rgba(5,5,14,0.99) 100%);
         border-top:2px solid #2a2a4a; padding:10px 20px 12px;
         pointer-events:all;">

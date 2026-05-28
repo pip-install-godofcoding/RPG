@@ -86,10 +86,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Movement
     let vx = 0, vy = 0;
-    const up = this.cursors.up.isDown || this.wasd.W.isDown;
-    const down = this.cursors.down.isDown || this.wasd.S.isDown;
-    const left = this.cursors.left.isDown || this.wasd.A.isDown;
-    const right = this.cursors.right.isDown || this.wasd.D.isDown;
+    const joy = this.scene.mobileControls?.getAxis() || { x: 0, y: 0 };
+    const up    = this.cursors.up.isDown    || this.wasd.W.isDown || joy.y < -0.25;
+    const down  = this.cursors.down.isDown  || this.wasd.S.isDown || joy.y >  0.25;
+    const left  = this.cursors.left.isDown  || this.wasd.A.isDown || joy.x < -0.25;
+    const right = this.cursors.right.isDown || this.wasd.D.isDown || joy.x >  0.25;
 
     if (up) vy = -1;
     else if (down) vy = 1;
