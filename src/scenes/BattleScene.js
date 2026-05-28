@@ -42,21 +42,21 @@ export class BattleScene extends Phaser.Scene {
 
     // ── Player sprite — positioned high enough to be above the panel
     const pKey = `${this.player.classKey}_idle_right`;
-    this.playerSprite = this.add.sprite(310, 260, pKey, 0)
+    this.playerSprite = this.add.sprite(310, 310, pKey, 0)
       .setScale(4).setDepth(10).setFlipX(false);
     const pAnim = `anim_${this.player.classKey}_walk_right`;
     if (this.anims.exists(pAnim)) this.playerSprite.play(pAnim);
 
     // ── Enemy sprite — mirrored on the right
     const eKey = `${this.enemy.config.sprite}_idle`;
-    this.enemySprite = this.add.sprite(970, 260, eKey, 0)
+    this.enemySprite = this.add.sprite(970, 310, eKey, 0)
       .setScale(4).setDepth(10).setFlipX(true);
     const eAnim = `anim_${this.enemy.config.sprite}_idle`;
     if (this.anims.exists(eAnim)) this.enemySprite.play(eAnim);
 
     // Idle bob — gentle float
-    this.tweens.add({ targets: this.playerSprite, y: 245, duration: 900,  yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.tweens.add({ targets: this.enemySprite,  y: 245, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: this.playerSprite, y: 295, duration: 900,  yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.tweens.add({ targets: this.enemySprite,  y: 295, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 
     // ── Build HTML UI ──────────────────────────────────────
     this._buildUI();

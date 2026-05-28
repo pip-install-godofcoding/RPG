@@ -104,6 +104,16 @@ export class GameScene extends Phaser.Scene {
     // Mobile virtual controls (no-op on desktop)
     this.mobileControls = new MobileControls(this);
 
+    // ── Global shortcut keys (work from anywhere) ────────────────
+    this.input.keyboard.on('keydown-M', () => this.marketplace?.show('Shop'));
+    this.input.keyboard.on('keydown-G', () => this.guildSystem?.show());
+    this.input.keyboard.on('keydown-J', () => this.questSystem?.toggleTracker?.());
+    this.input.keyboard.on('keydown-P', () => this.pvp?.sendChallenge?.());
+
+    // Hide mobile controls whenever BattleScene is active, restore on resume
+    this.events.on('pause',  () => this.mobileControls?.hide());
+    this.events.on('resume', () => this.mobileControls?.show());
+
     // NPC interactions (simple)
     this._createNPCs();
 
