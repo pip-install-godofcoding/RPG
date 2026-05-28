@@ -320,6 +320,7 @@ ORDER BY g.level DESC;</div>
         await this.supabase.from('players').update({ guild_id: data.guild_id }).eq('username', username);
       }
     }
+    this.scene.multiplayer?.updatePresence();
     this._toast(`⚔ Guild "${name}" founded! −200g`, '#44ff88');
     this.close();
     setTimeout(() => this.show(), 400);
@@ -342,6 +343,7 @@ ORDER BY g.level DESC;</div>
         await this.supabase.from('players').update({ guild_id: guild.guild_id }).eq('username', username);
       }
     }
+    this.scene.multiplayer?.updatePresence();
     this._toast(`Joined ${guildName}!`, '#44ff88');
     this.close();
     setTimeout(() => this.show(), 400);
@@ -361,6 +363,7 @@ ORDER BY g.level DESC;</div>
     if (this.supabase) {
       await this.supabase.from('players').update({ guild_id: null }).eq('username', username);
     }
+    this.scene.multiplayer?.updatePresence();
     this._toast(`Left "${prev}"`, '#ffaa44');
     this.close();
     setTimeout(() => this.show(), 400);

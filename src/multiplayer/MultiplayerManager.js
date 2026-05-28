@@ -116,6 +116,17 @@ export class MultiplayerManager {
     });
   }
 
+  async updatePresence() {
+    if (!this.connected || !this.channel) return;
+    await this.channel.track({
+      username: window.ASHENVEIL.username,
+      class: window.ASHENVEIL.playerClass,
+      x: this.player.x, y: this.player.y,
+      level: this.player.level,
+      guild: window.ASHENVEIL.guildName || null,
+    });
+  }
+
   _syncPresence(state) {
     Object.entries(state).forEach(([key, presences]) => {
       if (key !== window.ASHENVEIL.username && presences[0]) {

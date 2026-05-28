@@ -84,6 +84,9 @@ export class GameScene extends Phaser.Scene {
       stroke: '#000000', strokeThickness: 3
     }).setOrigin(0.5).setDepth(15);
 
+    // Load save BEFORE initializing multiplayer so presence has guild info
+    this._loadGame();
+
     // Quest system
     this.questSystem = new QuestSystem(this, this.player);
 
@@ -116,9 +119,6 @@ export class GameScene extends Phaser.Scene {
 
     // NPC interactions (simple)
     this._createNPCs();
-
-    // Load save if continuing
-    this._loadGame();
 
     // Spawn enemies based on loaded player level
     this._spawnEnemies();
@@ -429,6 +429,8 @@ export class GameScene extends Phaser.Scene {
       maxHp: this.player.stats.maxHp,
       fog: this.fogOfWar.getExploredData(),
       zone: this.zoneManager.currentZone,
+      guildName: window.ASHENVEIL.guildName || null,
+      guildTag: window.ASHENVEIL.guildTag || null,
       timestamp: Date.now()
     };
     localStorage.setItem('ashenveil_save', JSON.stringify(save));
@@ -459,6 +461,8 @@ export class GameScene extends Phaser.Scene {
         if (save.maxHp) this.player.stats.maxHp = save.maxHp;
         this.player.xpToNext = this.player.level * this.player.level * 100;
         this.fogOfWar.loadExploredData(save.fog);
+        window.ASHENVEIL.guildName = save.guildName || null;
+        window.ASHENVEIL.guildTag  = save.guildTag || null;
       }
     } catch (e) { console.warn('Failed to load save', e); }
   }
