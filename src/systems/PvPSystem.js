@@ -175,8 +175,42 @@ export class PvPSystem {
   // ── The PvP Battle UI ────────────────────────────────────
   _startPvPCombat(oppName, oppClass, oppHP, oppMaxHP, oppAtk, oppGold, myTurnFirst) {
     this.inPvP = true;
+    this.scene.player.setVelocity(0, 0);
+    
+    // ── Setup Cinematic Battle Canvas ──
+    this.pvpVisuals = [];
+    const bg = this.scene.add.rectangle(640, 360, 2000, 1500, 0x0d0d18).setDepth(8000).setScrollFactor(0);
+    this.pvpVisuals.push(bg);
+
+    const ground = this.scene.add.graphics().setDepth(8001).setScrollFactor(0);
+    ground.fillStyle(0x1a2a1a, 1).fillEllipse(640, 390, 900, 180);
+    ground.lineStyle(3, 0x2a4a2a, 1).strokeEllipse(640, 390, 900, 180);
+    this.pvpVisuals.push(ground);
+
+    const pGlow = this.scene.add.graphics().setDepth(8002).setScrollFactor(0);
+    pGlow.fillStyle(0x3355aa, 0.22).fillEllipse(310, 380, 160, 50);
+    const eGlow = this.scene.add.graphics().setDepth(8002).setScrollFactor(0);
+    eGlow.fillStyle(0xaa3333, 0.22).fillEllipse(970, 380, 160, 50);
+    this.pvpVisuals.push(pGlow, eGlow);
+
+    const myClass = window.ASHENVEIL.playerClass || 'warrior';
+    const pSprite = this.scene.add.sprite(310, 310, `${myClass}_idle_right`, 0)
+      .setScale(4).setDepth(8010).setScrollFactor(0);
+    if (this.scene.anims.exists(`anim_${myClass}_walk_right`)) pSprite.play(`anim_${myClass}_walk_right`);
+    
+    const oClass = oppClass || 'warrior';
+    const oSprite = this.scene.add.sprite(970, 310, `${oClass}_idle_right`, 0)
+      .setScale(4).setDepth(8010).setFlipX(true).setScrollFactor(0);
+    if (this.scene.anims.exists(`anim_${oClass}_idle_right`)) oSprite.play(`anim_${oClass}_idle_right`);
+    
+    this.pvpVisuals.push(pSprite, oSprite);
+    
+    this.pvpTweens = [];
+    this.pvpTweens.push(this.scene.tweens.add({ targets: pSprite, y: 295, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }));
+    this.pvpTweens.push(this.scene.tweens.add({ targets: oSprite, y: 295, duration: 1100, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }));
+
     this.pvpState = {
-      oppName, oppClass: oppClass || 'warrior',
+      oppName, oppClass: oClass,
       myHP:    this.player.stats.hp,    myMaxHP:  this.player.stats.maxHp,
       oppHP,   oppMaxHP,
       myAtk:   this.player.stats.attack || 10,
@@ -210,13 +244,15 @@ export class PvPSystem {
         
         /* ── Mobile responsive ── */
         @media (max-width: 600px) {
-          #pvp-top-row { padding: 8px 10px !important; gap: 8px !important; }
-          #pvp-top-row > div { padding: 10px 10px !important; }
-          #pvp-top-row > div span[style*='font-size:15px'] { font-size: 12px !important; }
-          #pvp-buttons { grid-template-columns: 1fr 1fr !important; gap: 5px !important; }
-          .pvp-ab { padding: 7px 5px !important; }
-          #pvp-log { font-size: 12px !important; margin-bottom:5px !important; }
-          #pvp-bottom { padding: 8px 10px !important; padding-bottom: max(10px, env(safe-area-inset-bottom, 8px)) !important; }
+          #pvp-top-row { padding: 4px 6px !important; gap: 6px !important; }
+          #pvp-top-row > div { padding: 8px !important; }
+          #pvp-top-row > div span[style*='font-size:15px'] { font-size: 11px !important; }
+          #pvp-buttons { grid-template-columns: 1fr 1fr !important; gap: 4px !important; }
+          .pvp-ab { padding: 5px !important; }
+          .pvp-ab div span[style*='font-size:14px'] { font-size: 11px !important; }
+          #pvp-log { font-size: 11px !important; margin-bottom:4px !important; min-height:16px !important; }
+          #pvp-sql { max-height: 30px !important; font-size: 9px !important; }
+          #pvp-bottom { padding: 6px !important; padding-bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important; }
         }
       </style>
       <div id="pvp-overlay" style="
@@ -407,6 +443,11 @@ export class PvPSystem {
     this.overlay = null;
     this.inPvP   = false;
     this.pvpState = null;
+    
+    this.pvpVisuals?.forEach(v => v.destroy());
+    this.pvpTweens?.forEach(t => t.remove());
+    this.pvpVisuals = null;
+    this.pvpTweens = null;
 
     const msg = didIWin
       ? `🏆 You defeated ${s.oppName}! +${goldTransfer}g, +50 XP`
