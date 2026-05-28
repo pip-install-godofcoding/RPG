@@ -124,13 +124,15 @@ export class BattleScene extends Phaser.Scene {
 
       /* ── Mobile responsive ── */
       @media (max-width: 600px) {
-        #battle-top-row { flex-direction: column !important; padding: 8px 10px !important; gap: 8px !important; }
-        #battle-top-row > div { min-width: 0 !important; width: 100% !important; }
+        #battle-top-row { padding: 8px 10px !important; gap: 8px !important; }
+        #battle-top-row > div { padding: 10px 10px !important; }
+        #battle-top-row > div span[style*='font-size:15px'] { font-size: 12px !important; }
+        #battle-top-row > div span[style*='font-size:11px'] { font-size: 9px !important; }
         #battle-abilities { grid-template-columns: 1fr 1fr !important; gap: 5px !important; }
-        .battle-ab { padding: 8px 6px !important; }
-        .battle-ab div:first-child span:first-child { font-size: 12px !important; }
-        #battle-msg { font-size: 12px !important; }
-        #battle-bottom { padding: 8px 10px 10px !important; }
+        .battle-ab { padding: 7px 5px !important; }
+        .battle-ab div:first-child span:first-child { font-size: 11px !important; }
+        #battle-msg { font-size: 12px !important; margin-bottom:5px !important; }
+        #battle-bottom { padding: 8px 10px !important; padding-bottom: max(10px, env(safe-area-inset-bottom, 8px)) !important; }
       }
     </style>
     <div id="battle-ui" style="
@@ -141,11 +143,11 @@ export class BattleScene extends Phaser.Scene {
 
       <!-- TOP ROW: Stat Cards -->
       <div id="battle-top-row" style="display:flex; justify-content:space-between; align-items:flex-start;
-                  padding:16px 24px; gap:16px; pointer-events:none;">
+                  padding:16px 24px; gap:12px; pointer-events:none;">
 
         <!-- Player Card -->
         <div style="background:rgba(10,10,25,0.88); border:2px solid #3344aa;
-                    border-radius:14px; padding:14px 18px; min-width:280px;
+                    border-radius:14px; padding:14px 18px; flex:1; min-width:0;
                     backdrop-filter:blur(6px); box-shadow:0 4px 24px rgba(0,0,0,0.6);">
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
             <span style="font-weight:700;font-size:15px;color:#ddeeff;">${pName}</span>
@@ -175,7 +177,7 @@ export class BattleScene extends Phaser.Scene {
 
         <!-- Enemy Card -->
         <div style="background:rgba(25,10,10,0.88); border:2px solid #aa3333;
-                    border-radius:14px; padding:14px 18px; min-width:280px;
+                    border-radius:14px; padding:14px 18px; flex:1; min-width:0;
                     backdrop-filter:blur(6px); box-shadow:0 4px 24px rgba(0,0,0,0.6);">
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
             <span style="font-weight:700;font-size:15px;color:#ffdddd;">${e.config.name}</span>
@@ -200,7 +202,8 @@ export class BattleScene extends Phaser.Scene {
       <!-- BOTTOM ROW: Command panel -->
       <div id="battle-bottom" style="
         background:linear-gradient(180deg,rgba(8,8,20,0.97) 0%,rgba(5,5,14,0.99) 100%);
-        border-top:2px solid #2a2a4a; padding:10px 20px 12px;
+        border-top:2px solid #2a2a4a;
+        padding:10px 20px max(12px, env(safe-area-inset-bottom, 10px));
         pointer-events:all;">
 
         <!-- Action message -->

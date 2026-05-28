@@ -1,5 +1,6 @@
 // ============================================================
-// ClassSelectScene — Pick your class with animated previews
+// ClassSelectScene — Pick your class. Fully mobile-responsive
+// via a DOM overlay that replaces the Phaser canvas layout.
 // ============================================================
 import Phaser from 'phaser';
 import { CLASS_CONFIG } from '../config/ClassConfig.js';
@@ -8,159 +9,212 @@ export class ClassSelectScene extends Phaser.Scene {
   constructor() { super('ClassSelect'); }
 
   create() {
-    const { width, height } = this.cameras.main;
     this.cameras.main.setBackgroundColor('#0a0a0f');
     this.cameras.main.fadeIn(500, 10, 10, 15);
 
-    // Header
-    this.add.text(width / 2, 40, 'CHOOSE THY CLASS', {
-      fontFamily: 'Inter, sans-serif', fontSize: '18px', color: '#e0d0b0',
-      stroke: '#2a1a3e', strokeThickness: 3
-    }).setOrigin(0.5);
-
-    this.add.text(width / 2, 70, `Hero: ${window.ASHENVEIL.username}`, {
-      fontFamily: 'Inter, sans-serif', fontSize: '15px', color: '#a855f7'
-    }).setOrigin(0.5);
-
-    const classes = Object.entries(CLASS_CONFIG);
-    const cardW = 240;
-    const cardH = 460;
-    const gap = 30;
-    const totalW = classes.length * cardW + (classes.length - 1) * gap;
-    const startX = (width - totalW) / 2 + cardW / 2;
-
     this.selectedClass = null;
-    this.cards = [];
 
-    classes.forEach(([key, cfg], i) => {
-      const cx = startX + i * (cardW + gap);
-      const cy = height / 2 + 30;
+    // Remove any stale overlay
+    document.getElementById('class-select-overlay')?.remove();
 
-      // Card background
-      const card = this.add.rectangle(cx, cy, cardW, cardH, 0x111122, 0.9)
-        .setStrokeStyle(2, 0x4444aa, 0.6).setInteractive();
-
-      // Class color accent bar
-      this.add.rectangle(cx, cy - cardH / 2 + 4, cardW - 4, 6, cfg.color, 0.8);
-
-      // Class name
-      this.add.text(cx, cy - cardH / 2 + 30, cfg.name.toUpperCase(), {
-        fontFamily: 'Inter, sans-serif', fontSize: '16px', color: '#e0d0b0'
-      }).setOrigin(0.5);
-
-      // Sprite preview
-      const spriteKey = `${key}_idle_down`;
-      let preview;
-      if (this.textures.exists(spriteKey)) {
-        preview = this.add.sprite(cx, cy - cardH / 2 + 80, spriteKey, 0).setScale(2.5);
-        const animKey = `anim_${spriteKey}`;
-        if (this.anims.exists(animKey)) preview.play(animKey);
-      } else {
-        preview = this.add.circle(cx, cy - cardH / 2 + 80, 16, cfg.color);
-      }
-
-      // Stats
-      const statY = cy - cardH / 2 + 130;
-      const stats = [
-        { label: 'HP', value: cfg.stats.hp, max: 200, color: 0xcc2222 },
-        { label: cfg.resource === 'mana' ? 'MP' : 'STA', value: cfg.stats[cfg.resource === 'mana' ? 'mana' : 'mana'], max: 150, color: cfg.resource === 'mana' ? 0x2255cc : 0xcccc22 },
-        { label: 'ATK', value: cfg.stats.attack, max: 20, color: 0xcc8822 },
-        { label: 'DEF', value: cfg.stats.defense, max: 20, color: 0x44aa66 },
-        { label: 'SPD', value: cfg.stats.speed, max: 200, color: 0x8866cc }
-      ];
-      stats.forEach((s, j) => {
-        const sy = statY + j * 24;
-        this.add.text(cx - cardW / 2 + 15, sy, s.label, {
-          fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#888899'
-        });
-        const barStartX = cx - cardW / 2 + 50;
-        const barW = 120;
-        this.add.rectangle(barStartX, sy + 5, barW, 8, 0x1a1a2e).setOrigin(0, 0.5);
-        const fill = (s.value / s.max) * barW;
-        this.add.rectangle(barStartX, sy + 5, fill, 8, s.color, 0.8).setOrigin(0, 0.5);
-        this.add.text(barStartX + barW + 6, sy, `${s.value}`, {
-          fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#aaaaaa'
-        });
-      });
-
-      // Description
-      this.add.text(cx, statY + 130, cfg.description, {
-        fontFamily: 'Inter', fontSize: '16px', color: '#888899',
-        wordWrap: { width: cardW - 30 }, align: 'center', lineSpacing: 3
-      }).setOrigin(0.5, 0);
-
-      // Abilities list
-      const abY = statY + 190;
-      this.add.text(cx, abY, 'ABILITIES', {
-        fontFamily: 'Inter, sans-serif', fontSize: '10px', color: '#a855f7'
-      }).setOrigin(0.5);
-      cfg.abilities.forEach((ab, j) => {
-        this.add.text(cx - cardW / 2 + 15, abY + 18 + j * 18, `[${ab.key}] ${ab.name}`, {
-          fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#aabbcc'
-        });
-      });
-
-      // Hover & click
-      card.on('pointerover', () => {
-        card.setStrokeStyle(2, cfg.color, 1);
-        this.tweens.add({ targets: card, scaleX: 1.03, scaleY: 1.03, duration: 150 });
-      });
-      card.on('pointerout', () => {
-        if (this.selectedClass !== key) {
-          card.setStrokeStyle(2, 0x4444aa, 0.6);
-          this.tweens.add({ targets: card, scaleX: 1, scaleY: 1, duration: 150 });
-        }
-      });
-      card.on('pointerdown', () => {
-        if (this.selectedClass === key) {
-          // Double-click = go!
-          window.ASHENVEIL.playerClass = key;
-          this.cameras.main.fadeOut(500, 10, 10, 15);
-          this.cameras.main.once('camerafadeoutcomplete', () => {
-            this.scene.start('Game', { playerClass: key, isNew: true });
-          });
-          return;
-        }
-        this.selectedClass = key;
-        this.cards.forEach(c => {
-          c.card.setStrokeStyle(2, 0x4444aa, 0.6);
-          c.card.setScale(1);
-        });
-        card.setStrokeStyle(3, cfg.color, 1);
-        card.setScale(1.03);
-        this._showConfirm(key, cfg);
-      });
-
-      this.cards.push({ card, key });
-    });
+    this._buildDOM();
   }
 
-  _showConfirm(key, cfg) {
-    if (this.confirmBtn) this.confirmBtn.destroy();
-    if (this.confirmTxt) this.confirmTxt.destroy();
+  _buildDOM() {
+    const classes = Object.entries(CLASS_CONFIG);
 
-    const { width, height } = this.cameras.main;
-    const btnY = height - 50;
-    this.confirmBtn = this.add.rectangle(width / 2, btnY, 320, 44, 0x2a1a3e, 1)
-      .setStrokeStyle(3, 0xa855f7, 1).setInteractive({ useHandCursor: true });
-    this.confirmTxt = this.add.text(width / 2, btnY, `[ BEGIN AS ${cfg.name.toUpperCase()} ]`, {
-      fontFamily: 'Inter, sans-serif', fontSize: '16px', color: '#a855f7'
-    }).setOrigin(0.5);
+    const cardsHTML = classes.map(([key, cfg]) => {
+      const colorHex = '#' + cfg.color.toString(16).padStart(6, '0');
+      const stats = [
+        { label: 'HP',  value: cfg.stats.hp,      max: 200, color: '#cc2222' },
+        { label: cfg.resource === 'mana' ? 'MP' : 'STA', value: cfg.stats.mana, max: 150, color: cfg.resource === 'mana' ? '#2255cc' : '#cccc22' },
+        { label: 'ATK', value: cfg.stats.attack,   max: 20,  color: '#cc8822' },
+        { label: 'DEF', value: cfg.stats.defense,  max: 20,  color: '#44aa66' },
+        { label: 'SPD', value: cfg.stats.speed,    max: 200, color: '#8866cc' },
+      ];
+      const statBarsHTML = stats.map(s => {
+        const pct = Math.min(100, Math.round((s.value / s.max) * 100));
+        return `
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+            <span style="font-size:10px;color:#888;width:30px;flex-shrink:0;">${s.label}</span>
+            <div style="flex:1;background:#1a1a2e;border-radius:4px;height:7px;overflow:hidden;">
+              <div style="width:${pct}%;height:100%;background:${s.color};border-radius:4px;"></div>
+            </div>
+            <span style="font-size:10px;color:#aaa;width:28px;text-align:right;">${s.value}</span>
+          </div>`;
+      }).join('');
 
-    this.confirmBtn.on('pointerover', () => {
-      this.confirmBtn.setFillStyle(0xa855f7, 1);
-      this.confirmTxt.setColor('#0a0a0f');
-    });
-    this.confirmBtn.on('pointerout', () => {
-      this.confirmBtn.setFillStyle(0x2a1a3e, 1);
-      this.confirmTxt.setColor('#a855f7');
-    });
-    this.confirmBtn.on('pointerdown', () => {
+      const abilitiesHTML = cfg.abilities.map(ab =>
+        `<div style="font-size:10px;color:#aabbcc;padding:2px 0;">[${ab.key}] ${ab.name}</div>`
+      ).join('');
+
+      return `
+        <div class="cs-card" data-key="${key}" style="
+          background:rgba(10,10,25,0.92);
+          border:2px solid rgba(68,68,170,0.6);
+          border-radius:14px;
+          padding:16px;
+          cursor:pointer;
+          transition:border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+          position:relative;
+          overflow:hidden;
+          display:flex; flex-direction:column; gap:8px;
+        ">
+          <!-- Accent bar -->
+          <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${colorHex};border-radius:14px 14px 0 0;"></div>
+
+          <!-- Name -->
+          <div style="text-align:center;font-size:15px;font-weight:700;color:#e0d0b0;letter-spacing:1px;margin-top:4px;">
+            ${cfg.name.toUpperCase()}
+          </div>
+
+          <!-- Description -->
+          <div style="font-size:11px;color:#7788aa;line-height:1.5;text-align:center;">
+            ${cfg.description}
+          </div>
+
+          <!-- Stat bars -->
+          <div>${statBarsHTML}</div>
+
+          <!-- Abilities -->
+          <div>
+            <div style="font-size:10px;color:#a855f7;font-weight:700;margin-bottom:4px;letter-spacing:0.5px;">ABILITIES</div>
+            ${abilitiesHTML}
+          </div>
+        </div>`;
+    }).join('');
+
+    const html = `
+      <style>
+        #class-select-overlay {
+          position: fixed; inset: 0; z-index: 9500;
+          background: #0a0a0f;
+          display: flex; flex-direction: column;
+          align-items: center;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          font-family: 'Inter', 'Segoe UI', sans-serif;
+          padding: 20px 16px max(20px, env(safe-area-inset-bottom));
+          box-sizing: border-box;
+        }
+        #cs-header { text-align:center; margin-bottom:18px; flex-shrink:0; }
+        #cs-header h2 {
+          font-size: clamp(14px, 4vw, 22px);
+          color: #e0d0b0; letter-spacing: 2px; margin:0 0 6px;
+        }
+        #cs-header p { font-size:13px; color:#a855f7; margin:0; }
+
+        #cs-grid {
+          display: grid;
+          gap: 14px;
+          width: 100%;
+          max-width: 900px;
+          flex:1;
+        }
+        /* Desktop: 4 columns */
+        @media (min-width: 700px) {
+          #cs-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        /* Tablet: 2 columns */
+        @media (min-width: 420px) and (max-width: 699px) {
+          #cs-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        /* Phone portrait: 2 columns */
+        @media (max-width: 419px) {
+          #cs-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .cs-card:hover, .cs-card.cs-selected {
+          transform: translateY(-3px);
+          box-shadow: 0 6px 28px rgba(168,85,247,0.25);
+        }
+        .cs-card.cs-selected { border-color: #a855f7 !important; }
+
+        #cs-confirm {
+          margin-top: 16px; flex-shrink:0;
+          width: 100%; max-width: 320px;
+          display: none; flex-direction:column; align-items:center; gap:10px;
+        }
+        #cs-confirm-text {
+          font-size:13px;color:#a855f7;text-align:center;
+        }
+        #cs-confirm-btn {
+          width:100%; padding:14px;
+          background:#2a1a3e;
+          border:2px solid #a855f7;
+          border-radius:10px;
+          color:#a855f7;
+          font-size:15px; font-weight:700;
+          cursor:pointer;
+          font-family:inherit;
+          transition:background 0.2s, color 0.2s;
+          touch-action:manipulation;
+        }
+        #cs-confirm-btn:active { background:#a855f7; color:#0a0a0f; }
+      </style>
+
+      <div id="class-select-overlay">
+        <div id="cs-header">
+          <h2>⚔ CHOOSE THY CLASS</h2>
+          <p>Hero: ${window.ASHENVEIL.username || 'Adventurer'}</p>
+        </div>
+
+        <div id="cs-grid">${cardsHTML}</div>
+
+        <div id="cs-confirm">
+          <div id="cs-confirm-text">Tap again to confirm</div>
+          <button id="cs-confirm-btn">BEGIN ADVENTURE</button>
+        </div>
+      </div>`;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+    this._wireCards();
+  }
+
+  _wireCards() {
+    const cards = document.querySelectorAll('.cs-card');
+    const confirmBox = document.getElementById('cs-confirm');
+    const confirmBtn = document.getElementById('cs-confirm-btn');
+    const confirmText = document.getElementById('cs-confirm-text');
+
+    const launchGame = (key) => {
       window.ASHENVEIL.playerClass = key;
+      document.getElementById('class-select-overlay')?.remove();
       this.cameras.main.fadeOut(500, 10, 10, 15);
       this.cameras.main.once('camerafadeoutcomplete', () => {
         this.scene.start('Game', { playerClass: key, isNew: true });
       });
+    };
+
+    cards.forEach(card => {
+      const key = card.dataset.key;
+      const cfg = CLASS_CONFIG[key];
+      const colorHex = '#' + cfg.color.toString(16).padStart(6, '0');
+
+      card.addEventListener('click', () => {
+        if (this.selectedClass === key) {
+          launchGame(key);
+          return;
+        }
+        // Deselect all
+        cards.forEach(c => {
+          c.classList.remove('cs-selected');
+          c.style.borderColor = 'rgba(68,68,170,0.6)';
+        });
+        // Select this one
+        this.selectedClass = key;
+        card.classList.add('cs-selected');
+        card.style.borderColor = colorHex;
+        // Show confirm bar
+        confirmBox.style.display = 'flex';
+        confirmText.textContent = `${cfg.name.toUpperCase()} selected — tap again or press Begin`;
+        confirmBtn.textContent = `BEGIN AS ${cfg.name.toUpperCase()}`;
+        confirmBtn.onclick = () => launchGame(key);
+      });
     });
+  }
+
+  shutdown() {
+    document.getElementById('class-select-overlay')?.remove();
   }
 }

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realm of Ashenveil - Database ER Diagram</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { margin-bottom: 30px; color: #a855f7; }
+        .mermaid {
+            background-color: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #334155;
+        }
+    </style>
+</head>
+<body>
+    <h1>Realm of Ashenveil - ER Diagram</h1>
+    <div class="mermaid">
+    erDiagram
+        GUILDS {
+            uuid guild_id PK
+            varchar guild_name "UNIQUE"
+            varchar guild_tag "UNIQUE"
+            int level
+            int gold_bank
+            int max_members
+            timestamp created_at
+        }
+    
+        PLAYERS {
+            uuid player_id PK "Auth UID"
+            varchar username "UNIQUE"
+            varchar class
+            int level
+            int xp
+            int hp
+            int max_hp
+            int mana
+            int gold
+            float position_x
+            float position_y
+            varchar current_zone
+            uuid guild_id FK
+            boolean is_online
+            timestamp last_seen
+            timestamp created_at
+        }
+    
+        ITEM_TYPES {
+            int type_id PK
+            varchar type_name "UNIQUE"
+        }
+    
+        RARITY {
+            int rarity_id PK
+            varchar rarity_name "UNIQUE"
+            varchar color_code
+        }
+    
+        ITEMS {
+            uuid item_id PK
+            varchar name
+            int type_id FK
+            int rarity_id FK
+            int attack_bonus
+            int defense_bonus
+            int sell_price
+            text lore_text
+        }
+    
+        INVENTORY {
+            uuid inv_id PK
+            uuid player_id FK
+            uuid item_id FK
+            int quantity
+            boolean equipped
+            varchar slot
+        }
+    
+        QUESTS {
+            int quest_id PK
+            varchar title
+            text description
+            varchar zone
+            int xp_reward
+            int gold_reward
+            int required_level
+        }
+    
+        PLAYER_QUESTS {
+            uuid player_id PK, FK
+            int quest_id PK, FK
+            varchar status
+            jsonb progress
+            timestamp started_at
+            timestamp completed_at
+        }
+    
+        BATTLE_LOG {
+            uuid log_id PK
+            uuid attacker_id FK
+            varchar defender_id
+            int damage
+            varchar skill_used
+            boolean is_critical
+            varchar zone
+            timestamp timestamp
+        }
+    
+        %% Relationships
+        GUILDS ||--o{ PLAYERS : "has many"
+        PLAYERS ||--o{ INVENTORY : "owns"
+        ITEMS ||--o{ INVENTORY : "is stacked in"
+        ITEM_TYPES ||--o{ ITEMS : "categorizes"
+        RARITY ||--o{ ITEMS : "describes"
+        PLAYERS ||--o{ PLAYER_QUESTS : "tracks"
+        QUESTS ||--o{ PLAYER_QUESTS : "defines"
+        PLAYERS ||--o{ BATTLE_LOG : "initiates"
+    </div>
+</body>
+</html>

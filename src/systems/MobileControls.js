@@ -1,6 +1,7 @@
 // ============================================================
 // MobileControls — Virtual joystick + action buttons for touch
 // Only activates on devices with touch input.
+// Respects iOS/Android safe-area insets (home bar, notch).
 // ============================================================
 
 export class MobileControls {
@@ -23,81 +24,103 @@ export class MobileControls {
 
     const html = `
       <style id="mc-style">
-        #mc-root { position:fixed; inset:0; z-index:8000; pointer-events:none; }
+        #mc-root {
+          position: fixed; inset: 0;
+          z-index: 8000; pointer-events: none;
+          /* Safe area padding for notch / home bar */
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+          padding-left:   env(safe-area-inset-left,   0px);
+          padding-right:  env(safe-area-inset-right,  0px);
+          box-sizing: border-box;
+        }
 
-        /* ── Joystick ── */
+        /* ── Joystick zone ── */
         #mc-joystick-zone {
-          position:absolute; bottom:28px; left:24px;
-          width:130px; height:130px;
-          background:rgba(255,255,255,0.07);
-          border:2.5px solid rgba(255,255,255,0.18);
-          border-radius:50%; pointer-events:all; touch-action:none;
-          display:flex; align-items:center; justify-content:center;
-          box-shadow:0 0 20px rgba(100,150,255,0.12);
+          position: absolute;
+          bottom: max(20px, env(safe-area-inset-bottom, 16px) + 16px);
+          left:   max(20px, env(safe-area-inset-left,   16px) + 16px);
+          width: 120px; height: 120px;
+          background: rgba(255,255,255,0.07);
+          border: 2.5px solid rgba(255,255,255,0.20);
+          border-radius: 50%;
+          pointer-events: all; touch-action: none;
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 0 24px rgba(100,150,255,0.14);
         }
         #mc-knob {
-          width:48px; height:48px;
-          background:radial-gradient(circle at 35% 35%, rgba(200,220,255,0.9), rgba(100,130,255,0.6));
-          border:2px solid rgba(255,255,255,0.7);
-          border-radius:50%; position:absolute;
-          pointer-events:none;
-          box-shadow:0 0 14px rgba(120,160,255,0.4);
-          transition:box-shadow 0.1s;
+          width: 44px; height: 44px;
+          background: radial-gradient(circle at 35% 35%, rgba(200,220,255,0.92), rgba(100,130,255,0.65));
+          border: 2px solid rgba(255,255,255,0.75);
+          border-radius: 50%;
+          position: absolute;
+          pointer-events: none;
+          box-shadow: 0 0 14px rgba(120,160,255,0.45);
         }
 
-        /* ── Main action grid (bottom-right) ── */
+        /* ── Main action grid (bottom-right 2x2) ── */
         #mc-actions {
-          position:absolute; bottom:28px; right:18px;
-          display:grid; grid-template-columns:1fr 1fr;
-          gap:10px; pointer-events:all;
+          position: absolute;
+          bottom: max(20px, env(safe-area-inset-bottom, 16px) + 16px);
+          right:  max(14px, env(safe-area-inset-right,  10px) + 10px);
+          display: grid; grid-template-columns: 1fr 1fr;
+          gap: 8px; pointer-events: all;
         }
         .mc-btn {
-          width:62px; height:62px;
-          background:rgba(8,8,24,0.82);
-          border:2px solid rgba(100,120,255,0.45);
-          border-radius:14px; color:#ddeeff;
-          display:flex; flex-direction:column;
-          align-items:center; justify-content:center; gap:3px;
-          cursor:pointer; touch-action:manipulation;
-          user-select:none; -webkit-user-select:none;
-          font-family:'Inter',sans-serif;
-          backdrop-filter:blur(6px);
-          transition:background 0.1s, transform 0.1s, border-color 0.1s;
+          width: 58px; height: 58px;
+          background: rgba(8,8,24,0.85);
+          border: 2px solid rgba(100,120,255,0.5);
+          border-radius: 12px; color: #ddeeff;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center; gap: 2px;
+          cursor: pointer; touch-action: manipulation;
+          user-select: none; -webkit-user-select: none;
+          font-family: 'Inter', sans-serif;
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          transition: background 0.1s, transform 0.1s, border-color 0.15s;
         }
         .mc-btn:active, .mc-btn.mc-pressed {
-          background:rgba(80,110,255,0.3);
-          border-color:#88aaff;
-          transform:scale(0.91);
+          background: rgba(80,110,255,0.32);
+          border-color: #88aaff;
+          transform: scale(0.90);
         }
-        .mc-btn .mc-icon { font-size:20px; line-height:1; }
-        .mc-btn .mc-label {
-          font-size:9px; font-weight:700;
-          letter-spacing:0.5px; opacity:0.65;
-          text-transform:uppercase;
-        }
+        .mc-btn .mc-icon  { font-size: 19px; line-height: 1; }
+        .mc-btn .mc-label { font-size: 8px; font-weight: 700; letter-spacing: 0.4px; opacity: 0.6; text-transform: uppercase; }
 
-        /* ── Top-right compact buttons ── */
+        /* ── Top-right utility buttons ── */
         #mc-top {
-          position:absolute; top:18px; right:14px;
-          display:flex; gap:8px; pointer-events:all;
+          position: absolute;
+          top:   max(14px, env(safe-area-inset-top,   12px) + 12px);
+          right: max(14px, env(safe-area-inset-right, 10px) + 10px);
+          display: flex; gap: 7px; pointer-events: all;
         }
         .mc-top-btn {
-          padding:7px 14px;
-          background:rgba(8,8,24,0.8);
-          border:1px solid rgba(100,100,200,0.4);
-          border-radius:10px; color:#aabbff;
-          font-size:11px; font-weight:700;
-          font-family:'Inter',sans-serif;
-          cursor:pointer; touch-action:manipulation;
-          user-select:none; -webkit-user-select:none;
-          backdrop-filter:blur(4px);
+          padding: 7px 12px;
+          background: rgba(8,8,24,0.82);
+          border: 1px solid rgba(100,100,200,0.45);
+          border-radius: 10px; color: #aabbff;
+          font-size: 11px; font-weight: 700;
+          font-family: 'Inter', sans-serif;
+          cursor: pointer; touch-action: manipulation;
+          user-select: none; -webkit-user-select: none;
+          backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+          white-space: nowrap;
         }
-        .mc-top-btn:active { background:rgba(80,100,255,0.3); }
+        .mc-top-btn:active { background: rgba(80,100,255,0.32); }
+
+        /* ── Small screen: shrink slightly ── */
+        @media (max-width: 360px) {
+          #mc-joystick-zone { width: 100px; height: 100px; }
+          .mc-btn { width: 50px; height: 50px; }
+          .mc-btn .mc-icon { font-size: 16px; }
+        }
       </style>
 
       <div id="mc-root">
+        <!-- Joystick -->
         <div id="mc-joystick-zone"><div id="mc-knob"></div></div>
 
+        <!-- 2x2 Action buttons -->
         <div id="mc-actions">
           <button class="mc-btn" id="mc-btn-e">
             <span class="mc-icon">⚡</span><span class="mc-label">Act</span>
@@ -113,6 +136,7 @@ export class MobileControls {
           </button>
         </div>
 
+        <!-- Top-right utility -->
         <div id="mc-top">
           <button class="mc-top-btn" id="mc-btn-j">📜 Quests</button>
           <button class="mc-top-btn" id="mc-btn-tab">🗄 DB</button>
@@ -130,7 +154,7 @@ export class MobileControls {
     const knob = document.getElementById('mc-knob');
     if (!zone || !knob) return;
 
-    const MAX_TRAVEL = 40;
+    const MAX_TRAVEL = 38;
     let touching = false;
 
     const getCenter = () => {
@@ -188,7 +212,7 @@ export class MobileControls {
   /** Returns normalized {x, y} from -1 to 1 */
   getAxis() { return this.joystick; }
 
-  show() { if (this._el) this._el.style.display = ''; }
-  hide() { if (this._el) this._el.style.display = 'none'; }
+  show()    { if (this._el) this._el.style.display = ''; }
+  hide()    { if (this._el) this._el.style.display = 'none'; }
   destroy() { this._el?.remove(); }
 }
