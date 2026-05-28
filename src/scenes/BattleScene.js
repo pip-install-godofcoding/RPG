@@ -216,8 +216,7 @@ export class BattleScene extends Phaser.Scene {
 
         <!-- 2x2 Ability grid (hidden until Fight chosen) -->
         <div id="battle-abilities" style="
-          display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:7px;
-          visibility:hidden;">
+          display:none; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:7px;">
           ${abilitiesHTML}
         </div>
 
@@ -368,7 +367,7 @@ export class BattleScene extends Phaser.Scene {
     const abilities = document.getElementById('battle-abilities');
     const combatFlee = document.getElementById('battle-combat-flee');
     if (prompt)    prompt.style.display    = 'flex';
-    if (abilities)  abilities.style.visibility = 'hidden';
+    if (abilities)  abilities.style.display  = 'none';
     if (combatFlee) combatFlee.style.display = 'none';
     this._msg(`⚔ A wild <strong style="color:#ffcc44">${this.enemy.config.name}</strong> appears! What do you do?`);
   }
@@ -379,7 +378,7 @@ export class BattleScene extends Phaser.Scene {
     const abilities = document.getElementById('battle-abilities');
     const combatFlee = document.getElementById('battle-combat-flee');
     if (prompt)    prompt.style.display    = 'none';
-    if (abilities)  abilities.style.visibility = 'visible';
+    if (abilities)  abilities.style.display  = 'grid';
     if (combatFlee) combatFlee.style.display = 'block';
 
     this._logDBMS(`-- Encounter Started: ${this.enemy.config.name}`);

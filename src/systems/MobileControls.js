@@ -26,7 +26,7 @@ export class MobileControls {
       <style id="mc-style">
         #mc-root {
           position: fixed; inset: 0;
-          z-index: 8000; pointer-events: none;
+          z-index: 9995; pointer-events: none;
           /* Safe area padding for notch / home bar */
           padding-bottom: env(safe-area-inset-bottom, 0px);
           padding-left:   env(safe-area-inset-left,   0px);
