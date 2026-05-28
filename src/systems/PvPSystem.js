@@ -176,6 +176,9 @@ export class PvPSystem {
   _startPvPCombat(oppName, oppClass, oppHP, oppMaxHP, oppAtk, oppGold, myTurnFirst) {
     this.inPvP = true;
     this.scene.player.setVelocity(0, 0);
+
+    // Hide mobile controls so they don't block the screen
+    if (this.scene.mobileControls) this.scene.mobileControls.hide();
     
     // ── Setup Cinematic Battle Canvas ──
     this.pvpVisuals = [];
@@ -243,21 +246,21 @@ export class PvPSystem {
         .hp-fill { transition: width 0.5s ease, background-color 0.5s ease; }
         
         /* ── Mobile responsive ── */
-        @media (max-width: 600px) {
+        @media (max-width: 600px), (max-height: 500px) {
           #pvp-top-row { padding: 4px 6px !important; gap: 6px !important; }
-          #pvp-top-row > div { padding: 8px !important; }
-          #pvp-top-row > div span[style*='font-size:15px'] { font-size: 11px !important; }
+          #pvp-top-row > div { padding: 6px 8px !important; border-width: 1px !important; }
+          #pvp-top-row > div span[style*='font-size:15px'] { font-size: 11px !important; margin-bottom: 4px !important; }
           #pvp-buttons { grid-template-columns: 1fr 1fr !important; gap: 4px !important; }
-          .pvp-ab { padding: 5px !important; }
-          .pvp-ab div span[style*='font-size:14px'] { font-size: 11px !important; }
-          #pvp-log { font-size: 11px !important; margin-bottom:4px !important; min-height:16px !important; }
-          #pvp-sql { max-height: 30px !important; font-size: 9px !important; }
-          #pvp-bottom { padding: 6px !important; padding-bottom: max(6px, env(safe-area-inset-bottom, 6px)) !important; }
+          .pvp-ab { padding: 5px !important; border-width: 1px !important; }
+          .pvp-ab div span[style*='font-size:14px'] { font-size: 10px !important; }
+          #pvp-log { font-size: 10px !important; margin-bottom:4px !important; min-height:14px !important; }
+          #pvp-sql { display: none !important; } /* Hide SQL log on very small screens to save space */
+          #pvp-bottom { padding: 6px !important; padding-bottom: max(6px, env(safe-area-inset-bottom, 4px)) !important; }
         }
       </style>
       <div id="pvp-overlay" style="
         position:fixed; inset:0; display:grid;
-        grid-template-rows: auto minmax(120px,1fr) auto;
+        grid-template-rows: auto 1fr auto;
         pointer-events:none; font-family:'Segoe UI',Arial,sans-serif;
         z-index:9990;">
         
@@ -448,6 +451,8 @@ export class PvPSystem {
     this.pvpTweens?.forEach(t => t.remove());
     this.pvpVisuals = null;
     this.pvpTweens = null;
+
+    if (this.scene.mobileControls) this.scene.mobileControls.show();
 
     const msg = didIWin
       ? `🏆 You defeated ${s.oppName}! +${goldTransfer}g, +50 XP`
