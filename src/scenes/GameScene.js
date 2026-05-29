@@ -22,6 +22,7 @@ import { Marketplace } from '../systems/Marketplace.js';
 import { GuildSystem } from '../systems/GuildSystem.js';
 import { PvPSystem } from '../systems/PvPSystem.js';
 import { MobileControls } from '../systems/MobileControls.js';
+import { PauseMenu } from '../systems/PauseMenu.js';
 
 export class GameScene extends Phaser.Scene {
   constructor() { super('Game'); }
@@ -103,6 +104,7 @@ export class GameScene extends Phaser.Scene {
     this.guildSystem = new GuildSystem(this, this.player);
     // PvP wired AFTER multiplayer so it can reference the channel
     this.pvp = new PvPSystem(this, this.player, this.multiplayer);
+    this.pauseMenu = new PauseMenu(this);
 
     // Mobile virtual controls (no-op on desktop)
     this.mobileControls = new MobileControls(this);
