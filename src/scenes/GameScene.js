@@ -258,7 +258,7 @@ export class GameScene extends Phaser.Scene {
 
         // Wire battle trigger for newly spawned enemies
         this.physics.add.overlap(this.player, enemy, () => {
-          if (!enemy.isDead && !enemy.inBattle && !this.scene.isPaused('Game')) {
+          if (!this.player.isDead && !enemy.isDead && !enemy.inBattle && !this.scene.isPaused('Game')) {
             console.log('[DEBUG] Overlap triggered battle with', enemy.config.name);
             this._startBattle(enemy);
           } else {
@@ -272,7 +272,7 @@ export class GameScene extends Phaser.Scene {
 
   _checkManualBattleTrigger() {
     // Fallback: If player presses E near an enemy, force a battle
-    if (this.player && Phaser.Input.Keyboard.JustDown(this.player.interactKey)) {
+    if (this.player && !this.player.isDead && Phaser.Input.Keyboard.JustDown(this.player.interactKey)) {
       const closeEnemy = this.enemies.find(e => 
         !e.isDead && !e.inBattle && 
         Phaser.Math.Distance.Between(this.player.x, this.player.y, e.x, e.y) < 40
@@ -333,7 +333,7 @@ export class GameScene extends Phaser.Scene {
 
       // Interaction zone
       this.physics.add.overlap(this.player, sprite, () => {
-        if (Phaser.Input.Keyboard.JustDown(this.player.interactKey)) {
+        if (!this.player.isDead && Phaser.Input.Keyboard.JustDown(this.player.interactKey)) {
           if (npc.action === 'marketplace') {
             this.marketplace?.show(npc.name);
           } else if (npc.action === 'guild') {
