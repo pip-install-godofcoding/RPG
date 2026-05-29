@@ -14,6 +14,17 @@ export class BattleScene extends Phaser.Scene {
     this.gameScene = data.gameScene;
     this.state     = 'PROMPT';
     this._uiEl     = null;   // root HTML overlay
+    this._shopEl   = null;   // shop overlay
+
+    // Battle shop items catalog
+    this.SHOP_ITEMS = [
+      { id:'hp_small',   name:'Health Potion',  icon:'🦪', cost:50,  desc:'Restore 80 HP',           action: p => { p.stats.hp = Math.min(p.stats.maxHp, p.stats.hp + 80); } },
+      { id:'hp_large',   name:'Mega Potion',    icon:'💥', cost:120, desc:'Restore 220 HP',           action: p => { p.stats.hp = Math.min(p.stats.maxHp, p.stats.hp + 220); } },
+      { id:'mp_small',   name:'Mana Elixir',    icon:'💙', cost:40,  desc:'Restore 60 MP',            action: p => { p.stats.mana = Math.min(p.stats.maxMana, p.stats.mana + 60); } },
+      { id:'mp_full',    name:'Ether',          icon:'✨', cost:100, desc:'Fully restore MP',         action: p => { p.stats.mana = p.stats.maxMana; } },
+      { id:'atk_boost',  name:'Power Shard',    icon:'⚔️', cost:80,  desc:'+25 Attack this battle',  action: p => { p.stats.attack = (p.stats.attack||10) + 25; } },
+      { id:'def_boost',  name:'Iron Rune',      icon:'🛡️', cost:80,  desc:'+30 Defense this battle', action: p => { p.stats.defense = (p.stats.defense||5) + 30; } },
+    ];
   }
 
   // ─────────────────────────────────────────────────────────
@@ -226,20 +237,29 @@ export class BattleScene extends Phaser.Scene {
           ${abilitiesHTML}
         </div>
 
-        <!-- Prompt row (Fight / Flee) -->
-        <div id="battle-prompt" style="display:flex; justify-content:center; gap:24px;">
+        <!-- Prompt row (Fight / Flee / Shop) -->
+        <div id="battle-prompt" style="display:flex; justify-content:center; gap:14px;">
           <button id="battle-fight-btn" style="
             background:linear-gradient(135deg,#1a4a1a,#0d2d0d); border:2px solid #44cc44;
-            border-radius:10px; padding:12px 40px; color:#44ff44; font-size:16px;
+            border-radius:10px; padding:12px 32px; color:#44ff44; font-size:16px;
             font-weight:700; cursor:pointer; transition:all 0.15s;
             font-family:'Segoe UI',Arial,sans-serif;"
             onmouseover="this.style.background='linear-gradient(135deg,#2a6a2a,#1a4a1a)'"
             onmouseout="this.style.background='linear-gradient(135deg,#1a4a1a,#0d2d0d)'">
             ⚔ Fight &nbsp;<span style="opacity:0.6;font-size:12px">[ENTER]</span>
           </button>
+          <button id="battle-shop-prompt-btn" style="
+            background:linear-gradient(135deg,#2a1a4a,#1a0d2d); border:2px solid #aa44ff;
+            border-radius:10px; padding:12px 32px; color:#cc88ff; font-size:16px;
+            font-weight:700; cursor:pointer; transition:all 0.15s;
+            font-family:'Segoe UI',Arial,sans-serif;"
+            onmouseover="this.style.background='linear-gradient(135deg,#4a2a6a,#2a1a4a)'"
+            onmouseout="this.style.background='linear-gradient(135deg,#2a1a4a,#1a0d2d)'">
+            🛝 Shop &nbsp;<span style="opacity:0.6;font-size:12px">[S]</span>
+          </button>
           <button id="battle-flee-btn" style="
             background:linear-gradient(135deg,#4a1a1a,#2d0d0d); border:2px solid #cc4444;
-            border-radius:10px; padding:12px 40px; color:#ff5555; font-size:16px;
+            border-radius:10px; padding:12px 32px; color:#ff5555; font-size:16px;
             font-weight:700; cursor:pointer; transition:all 0.15s;
             font-family:'Segoe UI',Arial,sans-serif;"
             onmouseover="this.style.background='linear-gradient(135deg,#6a2a2a,#4a1a1a)'"
@@ -248,8 +268,14 @@ export class BattleScene extends Phaser.Scene {
           </button>
         </div>
 
-        <!-- In-combat flee button (hidden until combat starts) -->
-        <div id="battle-combat-flee" style="display:none;text-align:right;margin-top:6px;">
+        <!-- In-combat flee + shop row (hidden until combat starts) -->
+        <div id="battle-combat-flee" style="display:none;display:flex;justify-content:space-between;margin-top:6px;">
+          <button id="battle-shop-combat-btn" style="
+            background:none;border:1px solid #6622aa;border-radius:6px;
+            padding:4px 14px;color:#aa44ff;font-size:12px;cursor:pointer;
+            font-family:'Segoe UI',Arial,sans-serif;">
+            🛝 Shop [S]
+          </button>
           <button id="battle-flee-combat-btn" style="
             background:none;border:1px solid #662222;border-radius:6px;
             padding:4px 14px;color:#aa4444;font-size:12px;cursor:pointer;
@@ -267,9 +293,10 @@ export class BattleScene extends Phaser.Scene {
     document.body.appendChild(wrapper);
     this._uiEl = wrapper;
 
-    // Wire fight/flee prompt buttons
+    // Wire fight/flee/shop prompt buttons
     document.getElementById('battle-fight-btn').onclick = () => this._startCombat();
     document.getElementById('battle-flee-btn').onclick  = () => this._flee();
+    document.getElementById('battle-shop-prompt-btn').onclick = () => this._openShop();
 
     // Wire dbms expand
     const dbmsHeader = document.getElementById('battle-dbms-header');
@@ -295,8 +322,9 @@ export class BattleScene extends Phaser.Scene {
       if (btn) btn.onclick = () => this._useAbility(ab, i);
     });
 
-    // Wire in-combat flee button
+    // Wire in-combat flee + shop buttons
     document.getElementById('battle-flee-combat-btn').onclick = () => this._flee();
+    document.getElementById('battle-shop-combat-btn').onclick = () => this._openShop();
   }
 
   _bindKeys() {
@@ -305,6 +333,10 @@ export class BattleScene extends Phaser.Scene {
     });
     this.input.keyboard.on('keydown-F', () => {
       if (this.state === 'PLAYER_TURN' || this.state === 'PROMPT') this._flee();
+    });
+    this.input.keyboard.on('keydown-S', () => {
+      if (this.state === 'PLAYER_TURN' || this.state === 'PROMPT') this._openShop();
+      else if (this.state === 'SHOP') this._closeShop();
     });
     this.player.classConfig.abilities.forEach((ab, i) => {
       this.input.keyboard.on(`keydown-${i + 1}`, () => {
@@ -380,16 +412,133 @@ export class BattleScene extends Phaser.Scene {
 
   _startCombat() {
     if (this.state !== 'PROMPT') return;
-    const prompt   = document.getElementById('battle-prompt');
+    const prompt    = document.getElementById('battle-prompt');
     const abilities = document.getElementById('battle-abilities');
     const combatFlee = document.getElementById('battle-combat-flee');
     if (prompt)    prompt.style.display    = 'none';
     if (abilities)  abilities.style.display  = 'grid';
-    if (combatFlee) combatFlee.style.display = 'block';
+    if (combatFlee) combatFlee.style.display = 'flex';
 
     this._logDBMS(`-- Encounter Started: ${this.enemy.config.name}`);
     this._logDBMS(`SELECT * FROM enemies WHERE name = '${this.enemy.config.name}';`);
     this._setTurn('PLAYER_TURN');
+  }
+
+  // ─────────────────────────────────────────────────────────
+  // Battle Shop
+  // ─────────────────────────────────────────────────────────
+  _openShop() {
+    if (this._shopEl) return;
+    const prevState = this.state;
+    this.state = 'SHOP';
+
+    const gold = this.player.gold;
+    const itemsHTML = this.SHOP_ITEMS.map(item => {
+      const canAfford = gold >= item.cost;
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;
+          background:rgba(255,255,255,0.04);border-radius:10px;
+          border:1px solid ${canAfford ? '#4a3a6a' : '#2a2a2a'};
+          margin-bottom:8px;opacity:${canAfford ? 1 : 0.4};">
+          <span style="font-size:28px;flex-shrink:0;">${item.icon}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:700;color:#e0d0ff;font-size:14px;">${item.name}</div>
+            <div style="font-size:11px;color:#aaa;">${item.desc}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="color:#ffcc44;font-weight:700;font-size:13px;">💰 ${item.cost}g</div>
+            <button data-item="${item.id}" class="shop-buy-btn" ${canAfford ? '' : 'disabled'}
+              style="margin-top:4px;background:${canAfford ? 'linear-gradient(135deg,#4a1f7a,#2d1050)' : '#1a1a1a'};
+                border:1px solid ${canAfford ? '#aa55ff' : '#333'};border-radius:6px;
+                padding:4px 14px;color:${canAfford ? '#cc88ff' : '#555'};font-size:12px;
+                font-weight:700;cursor:${canAfford ? 'pointer' : 'not-allowed'};
+                font-family:'Segoe UI',Arial,sans-serif;transition:all 0.15s;"
+              onmouseover="if(!this.disabled)this.style.background='#6633aa'"
+              onmouseout="if(!this.disabled)this.style.background='linear-gradient(135deg,#4a1f7a,#2d1050)'">
+              BUY
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+
+    const html = `
+      <div id="battle-shop-overlay" style="
+        position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9995;
+        display:flex;align-items:center;justify-content:center;
+        backdrop-filter:blur(3px);font-family:'Segoe UI',Arial,sans-serif;">
+        <div style="background:linear-gradient(145deg,#1a0d2e,#0d0d1e);
+          border:2px solid #7733cc;border-radius:16px;padding:24px;
+          width:min(420px,90vw);max-height:80vh;overflow-y:auto;
+          box-shadow:0 0 40px rgba(120,50,220,0.4);">
+          <!-- Header -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+            <div>
+              <div style="font-size:20px;font-weight:800;color:#e0d0ff;letter-spacing:2px;">🏪 BATTLE SHOP</div>
+              <div style="font-size:12px;color:#888;margin-top:2px;">Buy items to use in battle</div>
+            </div>
+            <div style="text-align:right;">
+              <div id="shop-gold-display" style="font-size:16px;font-weight:700;color:#ffcc44;">💰 ${gold}g</div>
+              <button id="battle-shop-close" style="margin-top:6px;background:none;
+                border:1px solid #663;border-radius:6px;padding:3px 12px;
+                color:#aaa;font-size:11px;cursor:pointer;">✕ Close [S]</button>
+            </div>
+          </div>
+          <!-- Items -->
+          <div id="shop-items-list">${itemsHTML}</div>
+          <!-- Used items log -->
+          <div id="shop-log" style="margin-top:10px;font-size:11px;color:#88cc88;min-height:18px;"></div>
+        </div>
+      </div>`;
+
+    this._shopEl = document.createElement('div');
+    this._shopEl.innerHTML = html;
+    document.body.appendChild(this._shopEl);
+
+    document.getElementById('battle-shop-close').onclick = () => this._closeShop(prevState);
+
+    this._shopEl.querySelectorAll('.shop-buy-btn').forEach(btn => {
+      btn.onclick = () => {
+        const itemId = btn.dataset.item;
+        const item = this.SHOP_ITEMS.find(i => i.id === itemId);
+        if (!item || this.player.gold < item.cost) return;
+
+        // Deduct gold and apply effect
+        this.player.gold -= item.cost;
+        item.action(this.player);
+        this._updateBars();
+
+        // Update gold display
+        document.getElementById('shop-gold-display').textContent = `💰 ${this.player.gold}g`;
+
+        // Log
+        const log = document.getElementById('shop-log');
+        if (log) log.textContent = `✓ Used ${item.name}! ${item.desc}`;
+
+        // Show DBMS
+        this._logDBMS(`-- Shop purchase: ${item.name}`);
+        this._logDBMS(`INSERT INTO shop_transactions (player, item, cost) VALUES ('${window.ASHENVEIL?.username}','${item.name}',${item.cost});`);
+        this._logDBMS(`UPDATE players SET gold = gold - ${item.cost} WHERE username = '${window.ASHENVEIL?.username}';`);
+
+        // Refresh shop to disable unaffordable items
+        const newGold = this.player.gold;
+        this._shopEl.querySelectorAll('.shop-buy-btn').forEach(b => {
+          const it = this.SHOP_ITEMS.find(x => x.id === b.dataset.item);
+          if (it && newGold < it.cost) {
+            b.disabled = true;
+            b.style.cursor = 'not-allowed';
+            b.style.color = '#555';
+            b.style.background = '#1a1a1a';
+            b.style.borderColor = '#333';
+            b.parentElement.parentElement.style.opacity = '0.4';
+          }
+        });
+      };
+    });
+  }
+
+  _closeShop(prevState = 'PLAYER_TURN') {
+    if (this._shopEl) { this._shopEl.remove(); this._shopEl = null; }
+    this.state = prevState;
   }
 
   _setTurn(turn) {

@@ -341,10 +341,13 @@ export class SpriteGenerator {
       frost_colossus: { c: COLORS.frost_colossus, shape: 'colossus' }
     };
     Object.entries(enemies).forEach(([name, e]) => {
+      // Boss sprites get taller canvas so crown/pauldrons aren't clipped
+      const isBossSprite = e.shape === 'king_blob' || e.shape === 'colossus';
+      const SH = isBossSprite ? 48 : T; // sprite height
       [['idle',2],['walk',4],['death',3]].forEach(([state, cnt]) => {
-        this._tex(`${name}_${state}`, T*cnt, T, g => {
+        this._tex(`${name}_${state}`, T*cnt, SH, g => {
           for (let f = 0; f < cnt; f++) {
-            const ox = f*T, cx = ox+16, cy = 16;
+            const ox = f*T, cx = ox+16, cy = isBossSprite ? 28 : 16;
             const alpha = state === 'death' ? 1-f*0.3 : 1;
             g.fillStyle(0x000000, 0.2*alpha);
             g.fillEllipse(cx, 28, 12, 4);
@@ -377,28 +380,92 @@ export class SpriteGenerator {
                 g.fillTriangle(cx+14,cy-4, cx+8,cy-12, cx+8,cy);
               }
             } else if (e.shape === 'king_blob') {
-              // Slime King: Massive blob with a crown
-              g.fillEllipse(cx, cy+b, 16+b, 14-b);
-              g.fillStyle(0xffcc00, alpha); // Crown
-              g.fillRect(cx-6, cy-12+b, 12, 4);
-              g.fillTriangle(cx-6, cy-12+b, cx-4, cy-16+b, cx-2, cy-12+b);
-              g.fillTriangle(cx-2, cy-12+b, cx, cy-16+b, cx+2, cy-12+b);
-              g.fillTriangle(cx+2, cy-12+b, cx+4, cy-16+b, cx+6, cy-12+b);
-              g.fillStyle(0x111111, alpha); // Eyes
-              g.fillCircle(cx-4, cy-2+b, 2.5); g.fillCircle(cx+4, cy-2+b, 2.5);
-              g.fillStyle(0xff2222, alpha); // Glowing red pupils
-              g.fillCircle(cx-4, cy-2+b, 1); g.fillCircle(cx+4, cy-2+b, 1);
-            } else if (e.shape === 'colossus') {
-              // Frost Colossus: Massive icy shoulders
-              g.fillRect(cx-12, cy-6+b, 24, 18); // body
-              g.fillStyle(0xffffff, 0.5*alpha); // icy sheen
-              g.fillRect(cx-10, cy-4+b, 8, 14);
+              // Slime King — big crowned blob
+              // Shadow
+              g.fillStyle(0x004400, 0.5*alpha);
+              g.fillEllipse(cx, cy+10, 22, 7);
+              // Body glow ring
+              g.fillStyle(0x33ff44, 0.18*alpha);
+              g.fillEllipse(cx, cy+3+b, 24, 20);
+              // Main slime body
               g.fillStyle(e.c, alpha);
-              g.fillRect(cx-16, cy-10+b, 10, 10); // L Pauldron
-              g.fillRect(cx+6, cy-10+b, 10, 10);  // R Pauldron
-              g.fillCircle(cx, cy-14+b, 6);       // Head
-              g.fillStyle(0x0044ff, alpha);       // Glowing blue eyes
-              g.fillCircle(cx-2, cy-15+b, 2); g.fillCircle(cx+2, cy-15+b, 2);
+              g.fillEllipse(cx, cy+3+b, 20, 17);
+              // Shine highlight
+              g.fillStyle(0xaaffaa, 0.5*alpha);
+              g.fillEllipse(cx-4, cy-1+b, 6, 4);
+              // Crown base band
+              g.fillStyle(0xffaa00, alpha);
+              g.fillRect(cx-8, cy-9+b, 16, 5);
+              // Crown jewel inlays
+              g.fillStyle(0xff2222, alpha);
+              g.fillRect(cx-5, cy-10+b, 3, 3);
+              g.fillStyle(0x2222ff, alpha);
+              g.fillRect(cx+2, cy-10+b, 3, 3);
+              // Crown spikes (3 prongs)
+              g.fillStyle(0xffcc00, alpha);
+              g.fillTriangle(cx-7, cy-9+b, cx-5, cy-18+b, cx-3, cy-9+b);
+              g.fillTriangle(cx-2, cy-9+b, cx, cy-20+b, cx+2, cy-9+b);
+              g.fillTriangle(cx+3, cy-9+b, cx+5, cy-18+b, cx+7, cy-9+b);
+              // Eyes
+              g.fillStyle(0x001100, alpha);
+              g.fillEllipse(cx-5, cy+1+b, 6, 7);
+              g.fillEllipse(cx+5, cy+1+b, 6, 7);
+              // Glowing pupils
+              g.fillStyle(0xff0000, alpha);
+              g.fillCircle(cx-5, cy+2+b, 2);
+              g.fillCircle(cx+5, cy+2+b, 2);
+              // Mouth grin
+              g.fillStyle(0x001100, alpha);
+              g.fillRect(cx-5, cy+8+b, 10, 3);
+              g.fillStyle(0xffffff, alpha);
+              g.fillRect(cx-4, cy+8+b, 2, 2);
+              g.fillRect(cx+2, cy+8+b, 2, 2);
+            } else if (e.shape === 'colossus') {
+              // Frost Colossus — armoured giant
+              // Shadow
+              g.fillStyle(0x000033, 0.4*alpha);
+              g.fillEllipse(cx, cy+12, 26, 8);
+              // Legs
+              g.fillStyle(e.c, alpha);
+              g.fillRect(cx-9, cy+4+b, 7, 10);
+              g.fillRect(cx+2, cy+4+b, 7, 10);
+              // Ice boots
+              g.fillStyle(0xaaccff, alpha);
+              g.fillRect(cx-10, cy+11+b, 9, 4);
+              g.fillRect(cx+1, cy+11+b, 9, 4);
+              // Body
+              g.fillStyle(e.c, alpha);
+              g.fillRect(cx-11, cy-6+b, 22, 13);
+              // Chest icy panel
+              g.fillStyle(0xddeeff, 0.7*alpha);
+              g.fillRect(cx-6, cy-4+b, 12, 9);
+              // Belt
+              g.fillStyle(0x334466, alpha);
+              g.fillRect(cx-11, cy+6+b, 22, 3);
+              // Left pauldron
+              g.fillStyle(0x88bbff, alpha);
+              g.fillRect(cx-18, cy-9+b, 9, 8);
+              g.fillStyle(0xaaccff, 0.6*alpha);
+              g.fillRect(cx-17, cy-8+b, 5, 4);
+              // Right pauldron
+              g.fillStyle(0x88bbff, alpha);
+              g.fillRect(cx+9, cy-9+b, 9, 8);
+              g.fillStyle(0xaaccff, 0.6*alpha);
+              g.fillRect(cx+10, cy-8+b, 5, 4);
+              // Head
+              g.fillStyle(e.c, alpha);
+              g.fillRect(cx-7, cy-18+b, 14, 13);
+              // Ice helm visor
+              g.fillStyle(0x334466, alpha);
+              g.fillRect(cx-7, cy-14+b, 14, 4);
+              // Blue glowing eyes
+              g.fillStyle(0x00aaff, alpha);
+              g.fillRect(cx-5, cy-13+b, 4, 2);
+              g.fillRect(cx+1, cy-13+b, 4, 2);
+              // Horn spikes
+              g.fillStyle(0xccddff, alpha);
+              g.fillTriangle(cx-7, cy-18+b, cx-4, cy-24+b, cx-1, cy-18+b);
+              g.fillTriangle(cx+1, cy-18+b, cx+4, cy-24+b, cx+7, cy-18+b);
             }
           }
         });
