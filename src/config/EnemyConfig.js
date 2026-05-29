@@ -33,20 +33,20 @@ export const ENEMY_CONFIG = {
     sprite: 'crystal_golem'
   },
   dragon: {
-    name: 'Vorathix', hp: 500, damage: 40, speed: 70, aggroRange: 250,
-    attackRange: 150, attackCooldown: 2000, xp: 500, goldMin: 100, goldMax: 200,
+    name: 'Vorathix', hp: 3500, damage: 85, speed: 70, aggroRange: 250,
+    attackRange: 150, attackCooldown: 2000, xp: 2000, goldMin: 500, goldMax: 1000,
     zones: ['boss_arena'], respawnTime: 120000, behavior: 'boss', isBoss: true,
     sprite: 'dragon'
   },
   slime_king: {
-    name: 'Slime King', hp: 300, damage: 25, speed: 50, aggroRange: 250,
-    attackRange: 80, attackCooldown: 2000, xp: 300, goldMin: 50, goldMax: 100,
+    name: 'Slime King', hp: 1500, damage: 45, speed: 50, aggroRange: 250,
+    attackRange: 80, attackCooldown: 2000, xp: 800, goldMin: 200, goldMax: 400,
     zones: ['oakhaven_boss'], respawnTime: 120000, behavior: 'boss', isBoss: true,
     sprite: 'slime_king'
   },
   frost_colossus: {
-    name: 'Frost Colossus', hp: 400, damage: 35, speed: 40, aggroRange: 250,
-    attackRange: 100, attackCooldown: 2500, xp: 400, goldMin: 80, goldMax: 150,
+    name: 'Frost Colossus', hp: 2500, damage: 65, speed: 40, aggroRange: 250,
+    attackRange: 100, attackCooldown: 2500, xp: 1200, goldMin: 300, goldMax: 600,
     zones: ['frostpeak_boss'], respawnTime: 120000, behavior: 'boss', isBoss: true,
     sprite: 'frost_colossus'
   }

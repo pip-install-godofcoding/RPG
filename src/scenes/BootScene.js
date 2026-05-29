@@ -71,7 +71,7 @@ export class BootScene extends Phaser.Scene {
     });
 
     // Enemy anims
-    const enemies = ['slime', 'skeleton', 'wolf', 'fire_imp', 'crystal_golem', 'dragon'];
+    const enemies = ['slime', 'skeleton', 'wolf', 'fire_imp', 'crystal_golem', 'dragon', 'slime_king', 'frost_colossus'];
     const enemyStates = { idle: 2, walk: 4, death: 3 };
     enemies.forEach(name => {
       Object.entries(enemyStates).forEach(([state, count]) => {

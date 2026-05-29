@@ -336,7 +336,9 @@ export class SpriteGenerator {
       wolf: { c: COLORS.wolf, shape: 'quad' },
       fire_imp: { c: COLORS.fire_imp, shape: 'hum' },
       crystal_golem: { c: COLORS.crystal_golem, shape: 'big' },
-      dragon: { c: COLORS.dragon, shape: 'big' }
+      dragon: { c: COLORS.dragon, shape: 'big' },
+      slime_king: { c: COLORS.slime_king, shape: 'king_blob' },
+      frost_colossus: { c: COLORS.frost_colossus, shape: 'colossus' }
     };
     Object.entries(enemies).forEach(([name, e]) => {
       [['idle',2],['walk',4],['death',3]].forEach(([state, cnt]) => {
@@ -374,6 +376,29 @@ export class SpriteGenerator {
                 g.fillTriangle(cx-14,cy-4, cx-8,cy-12, cx-8,cy);
                 g.fillTriangle(cx+14,cy-4, cx+8,cy-12, cx+8,cy);
               }
+            } else if (e.shape === 'king_blob') {
+              // Slime King: Massive blob with a crown
+              g.fillEllipse(cx, cy+b, 16+b, 14-b);
+              g.fillStyle(0xffcc00, alpha); // Crown
+              g.fillRect(cx-6, cy-12+b, 12, 4);
+              g.fillTriangle(cx-6, cy-12+b, cx-4, cy-16+b, cx-2, cy-12+b);
+              g.fillTriangle(cx-2, cy-12+b, cx, cy-16+b, cx+2, cy-12+b);
+              g.fillTriangle(cx+2, cy-12+b, cx+4, cy-16+b, cx+6, cy-12+b);
+              g.fillStyle(0x111111, alpha); // Eyes
+              g.fillCircle(cx-4, cy-2+b, 2.5); g.fillCircle(cx+4, cy-2+b, 2.5);
+              g.fillStyle(0xff2222, alpha); // Glowing red pupils
+              g.fillCircle(cx-4, cy-2+b, 1); g.fillCircle(cx+4, cy-2+b, 1);
+            } else if (e.shape === 'colossus') {
+              // Frost Colossus: Massive icy shoulders
+              g.fillRect(cx-12, cy-6+b, 24, 18); // body
+              g.fillStyle(0xffffff, 0.5*alpha); // icy sheen
+              g.fillRect(cx-10, cy-4+b, 8, 14);
+              g.fillStyle(e.c, alpha);
+              g.fillRect(cx-16, cy-10+b, 10, 10); // L Pauldron
+              g.fillRect(cx+6, cy-10+b, 10, 10);  // R Pauldron
+              g.fillCircle(cx, cy-14+b, 6);       // Head
+              g.fillStyle(0x0044ff, alpha);       // Glowing blue eyes
+              g.fillCircle(cx-2, cy-15+b, 2); g.fillCircle(cx+2, cy-15+b, 2);
             }
           }
         });
