@@ -42,7 +42,7 @@ export class DBMSMode {
     this._hookGameEvents();
 
     scene.input.keyboard.addKey('TAB').on('down', () => this._cyclePanel());
-    scene.input.keyboard.addKey('C').on('down', () => this._toggleConcepts());
+    scene.input.keyboard.addKey('C').on('down', () => this.toggleConcepts());
 
     // Try connect to real Supabase
     this._connectSupabase();
@@ -475,45 +475,85 @@ export class DBMSMode {
   }
 
   // ─── CONCEPTS PANEL (C key) ──────────────────────────────
-  _toggleConcepts() {
+  toggleConcepts() {
     if (this.currentPanel === 'concepts') {
-      this.elements.forEach(e => e.destroy());
-      this.elements = [];
+      if (this._conceptsEl) { this._conceptsEl.remove(); this._conceptsEl = null; }
       this.currentPanel = null;
       return;
     }
-    if (this.currentPanel) { this.elements.forEach(e => e.destroy()); this.elements = []; }
+    // Clean up any other active phaser panels (Schema etc)
+    if (this.currentPanel && this.elements) { 
+      this.elements.forEach(e => e.destroy()); 
+      this.elements = []; 
+    }
     this.currentPanel = 'concepts';
-    const s = this.scene, cx = 640;
 
-    const bg = s.add.rectangle(cx, 360, 800, 550, 0x08080f, 0.97)
-      .setStrokeStyle(2, 0x44aaff, 0.8).setDepth(400).setScrollFactor(0);
-    const t = s.add.text(cx, 100, '📚  DBMS CONCEPTS ENCYCLOPEDIA', {
-      fontFamily: 'Inter, sans-serif', fontSize: '15px', color: '#44aaff'
-    }).setOrigin(0.5).setDepth(401).setScrollFactor(0);
-    const counter = s.add.text(1010, 100, `${this.conceptsSeen.size}/${Object.keys(CONCEPTS).length} Discovered`, {
-      fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#44aaff'
-    }).setOrigin(1, 0.5).setDepth(401).setScrollFactor(0);
-    const cl = s.add.text(1010, 115, '[C] Close', {
-      fontFamily: 'Inter, sans-serif', fontSize: '7px', color: '#666'
-    }).setOrigin(1, 0).setDepth(401).setScrollFactor(0);
-    this.elements.push(bg, t, counter, cl);
-
-    Object.entries(CONCEPTS).forEach(([key, c], i) => {
-      const y = 130 + i * 40;
+    const itemsHTML = Object.entries(CONCEPTS).map(([key, c]) => {
       const seen = this.conceptsSeen.has(key);
       const icon = seen ? '✅' : '🔒';
+      const color = seen ? c.color : '#555566';
+      const descColor = seen ? '#cccccc' : '#444455';
+      const desc = seen ? c.desc.replace(/\n/g, '<br>') : '[ Play the game to unlock this concept ]';
+      return `
+        <div style="margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.05);">
+          <div style="font-size:13px; font-weight:800; color:${color}; margin-bottom:6px; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
+            <span style="font-size:16px;">${icon}</span> ${c.title}
+          </div>
+          <div style="font-size:13px; color:${descColor}; line-height:1.5; padding-left:24px;">
+            ${desc}
+          </div>
+        </div>
+      `;
+    }).join('');
 
-      const nm = s.add.text(260, y, `${icon}  ${c.title}`, {
-        fontFamily: 'Inter, sans-serif', fontSize: '10px', color: seen ? c.color : '#333344'
-      }).setDepth(401).setScrollFactor(0);
+    const html = `
+      <div id="dbms-concepts-overlay" style="
+        position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+        z-index:9995; background:rgba(0,0,0,0.7); backdrop-filter:blur(3px);
+        font-family:'Inter',sans-serif; pointer-events:auto;">
+        
+        <div style="background:linear-gradient(145deg,#0a0a0f,#1a1a2e); 
+          border:2px solid #44aaff; border-radius:12px; padding:24px;
+          width:min(700px, 90vw); height:70vh; display:flex; flex-direction:column;
+          box-shadow:0 0 40px rgba(68,170,255,0.2);">
+          
+          <!-- Header -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; flex-shrink:0;">
+            <div>
+              <div style="font-size:20px; font-weight:900; color:#44aaff; letter-spacing:2px; display:flex; align-items:center; gap:10px;">
+                <span style="font-size:24px;">📚</span> DBMS CONCEPTS ENCYCLOPEDIA
+              </div>
+              <div style="font-size:12px; color:#888; margin-top:4px; margin-left:34px;">
+                Learn SQL concepts as you encounter them in the world
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:14px; font-weight:700; color:#44aaff; margin-bottom:6px;">
+                ${this.conceptsSeen.size} / ${Object.keys(CONCEPTS).length} Discovered
+              </div>
+              <button id="concepts-close-btn" style="
+                background:rgba(68,170,255,0.1); border:1px solid #44aaff; border-radius:6px;
+                padding:6px 16px; color:#44aaff; font-size:12px; font-weight:bold; cursor:pointer;
+                transition:all 0.15s;"
+                onmouseover="this.style.background='rgba(68,170,255,0.3)'"
+                onmouseout="this.style.background='rgba(68,170,255,0.1)'">
+                ✕ Close [C]
+              </button>
+            </div>
+          </div>
 
-      const d = s.add.text(262, y + 16, seen ? c.desc.replace('\n', ' ') : '[ Play the game to unlock this concept ]', {
-        fontFamily: 'Inter', fontSize: '13px', color: seen ? '#bbbbbb' : '#333344',
-        wordWrap: { width: 720 }
-      }).setDepth(401).setScrollFactor(0);
+          <!-- Scrollable Content -->
+          <div style="flex:1; overflow-y:auto; padding-right:16px; scrollbar-width:thin; scrollbar-color:#44aaff #1a1a2e;">
+            ${itemsHTML}
+          </div>
+        </div>
+      </div>
+    `;
 
-      this.elements.push(nm, d);
-    });
+    this._conceptsEl = document.createElement('div');
+    this._conceptsEl.innerHTML = html;
+    document.body.appendChild(this._conceptsEl);
+
+    document.getElementById('concepts-close-btn').onclick = () => this.toggleConcepts();
   }
 }
