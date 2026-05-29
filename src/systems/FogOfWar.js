@@ -65,13 +65,34 @@ export class FogOfWar {
 
   loadExploredData(data) {
     if (!data || !Array.isArray(data)) return;
-    data.forEach(key => {
-      this.exploredTiles.add(key);
-      const [tx, ty] = key.split(',').map(Number);
-      this.fogRT.erase(this.brushSprite,
-        tx * TILE_SIZE - this.revealRadius + TILE_SIZE / 2,
-        ty * TILE_SIZE - this.revealRadius + TILE_SIZE / 2
-      );
-    });
+    
+    // Process in chunks to prevent "Page Unresponsive" browser freezes
+    // due to thousands of WebGL erase operations occurring in a single frame.
+    const chunkSize = 150;
+    let index = 0;
+
+    const processChunk = () => {
+      if (!this.scene || !this.fogRT || index >= data.length) return;
+
+      const end = Math.min(index + chunkSize, data.length);
+      for (let i = index; i < end; i++) {
+        const key = data[i];
+        this.exploredTiles.add(key);
+        const [tx, ty] = key.split(',').map(Number);
+        this.fogRT.erase(this.brushSprite,
+          tx * TILE_SIZE - this.revealRadius + TILE_SIZE / 2,
+          ty * TILE_SIZE - this.revealRadius + TILE_SIZE / 2
+        );
+      }
+      index = end;
+
+      if (index < data.length) {
+        this.scene.time.delayedCall(1, processChunk);
+      } else {
+        console.log(`[FOG] Finished loading ${data.length} explored tiles.`);
+      }
+    };
+
+    processChunk();
   }
 }
