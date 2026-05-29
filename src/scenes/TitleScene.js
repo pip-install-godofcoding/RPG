@@ -74,31 +74,49 @@ export class TitleScene extends Phaser.Scene {
     }).setOrigin(0.5);
     this.tweens.add({ targets: prompt, alpha: 0.3, duration: 1200, yoyo: true, repeat: -1 });
 
-    // Menu options
-    const opts = ['NEW GAME', 'CONTINUE', 'DBMS MODE'];
+    const hasSave = !!localStorage.getItem('ashenveil_save');
+    const opts = ['NEW GAME', 'CONTINUE', window.ASHENVEIL.dbmsMode ? '✅ DBMS MODE: ON' : 'DBMS MODE'];
     this.selectedIdx = 0;
+    
     this.menuItems = opts.map((text, i) => {
+      let color = i === 0 ? '#a855f7' : '#666677';
+      if (i === 1 && !hasSave) color = '#333333';
+      if (i === 2 && window.ASHENVEIL.dbmsMode) color = '#ff8800';
+
       const t = this.add.text(width / 2, height / 2 + 140 + i * 35, text, {
-        fontFamily: 'Inter, sans-serif', fontSize: '16px',
-        color: i === 0 ? '#a855f7' : '#666677'
+        fontFamily: 'Inter, sans-serif', fontSize: '16px', color
       }).setOrigin(0.5).setInteractive();
       t.on('pointerover', () => { this.selectedIdx = i; this._updateMenu(); });
       t.on('pointerdown', () => this._selectOption(i));
       return t;
     });
 
-    // Input
-    this.input.keyboard.on('keydown-ENTER', () => this._selectOption(this.selectedIdx));
-    this.input.keyboard.on('keydown-UP', () => { this.selectedIdx = (this.selectedIdx - 1 + opts.length) % opts.length; this._updateMenu(); });
-    this.input.keyboard.on('keydown-DOWN', () => { this.selectedIdx = (this.selectedIdx + 1) % opts.length; this._updateMenu(); });
+    // Keyboard navigation
+    this.input.keyboard.on('keydown-UP', () => {
+      this.selectedIdx = (this.selectedIdx - 1 + opts.length) % opts.length;
+      this._updateMenu();
+    });
+    this.input.keyboard.on('keydown-DOWN', () => {
+      this.selectedIdx = (this.selectedIdx + 1) % opts.length;
+      this._updateMenu();
+    });
+    this.input.keyboard.on('keydown-ENTER', () => {
+      this._selectOption(this.selectedIdx);
+    });
 
     // Fade in
     this.cameras.main.fadeIn(1000, 10, 10, 15);
   }
 
   _updateMenu() {
+    const hasSave = !!localStorage.getItem('ashenveil_save');
     this.menuItems.forEach((t, i) => {
-      t.setColor(i === this.selectedIdx ? '#a855f7' : '#666677');
+      let color = i === this.selectedIdx ? '#a855f7' : '#666677';
+      if (i === 1 && !hasSave) color = '#333333';
+      if (i === 1 && !hasSave && this.selectedIdx === 1) color = '#ff4444'; // feedback
+      if (i === 2 && window.ASHENVEIL.dbmsMode && this.selectedIdx !== i) color = '#ff8800';
+      
+      t.setColor(color);
       t.setScale(i === this.selectedIdx ? 1.05 : 1);
     });
   }
@@ -121,6 +139,10 @@ export class TitleScene extends Phaser.Scene {
         this.cameras.main.once('camerafadeoutcomplete', () => {
           this.scene.start('Game', data);
         });
+      } else {
+        // Flash red if no save
+        this.menuItems[1].setColor('#ff4444');
+        setTimeout(() => this.menuItems[1].setColor('#333333'), 500);
       }
     } else if (idx === 2) {
       window.ASHENVEIL.dbmsMode = !window.ASHENVEIL.dbmsMode;

@@ -49,8 +49,9 @@ export class BattleScene extends Phaser.Scene {
 
     // ── Enemy sprite — mirrored on the right
     const eKey = `${this.enemy.config.sprite}_idle`;
-    this.enemySprite = this.add.sprite(970, 310, eKey, 0)
-      .setScale(4).setDepth(10).setFlipX(true);
+    const isBoss = this.enemy.config.isBoss;
+    this.enemySprite = this.add.sprite(970, isBoss ? 280 : 310, eKey, 0)
+      .setScale(isBoss ? 7 : 4).setDepth(10).setFlipX(true);
     const eAnim = `anim_${this.enemy.config.sprite}_idle`;
     if (this.anims.exists(eAnim)) this.enemySprite.play(eAnim);
 
@@ -177,11 +178,15 @@ export class BattleScene extends Phaser.Scene {
         </div>
 
         <!-- Enemy Card -->
-        <div style="background:rgba(25,10,10,0.88); border:2px solid #aa3333;
+        <div style="background:${e.config.isBoss ? 'rgba(30,10,25,0.92)' : 'rgba(25,10,10,0.88)'}; 
+                    border:2px solid ${e.config.isBoss ? '#ffaa00' : '#aa3333'};
                     border-radius:14px; padding:14px 18px; flex:1; min-width:0;
-                    backdrop-filter:blur(6px); box-shadow:0 4px 24px rgba(0,0,0,0.6);">
+                    backdrop-filter:blur(6px); 
+                    box-shadow:0 4px 24px ${e.config.isBoss ? 'rgba(255,170,0,0.4)' : 'rgba(0,0,0,0.6)'};">
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
-            <span style="font-weight:700;font-size:15px;color:#ffdddd;">${e.config.name}</span>
+            <span style="font-weight:700;font-size:15px;color:${e.config.isBoss ? '#ffcc44' : '#ffdddd'}; text-shadow:${e.config.isBoss ? '0 0 10px #ffaa00' : 'none'};">
+              ${e.config.isBoss ? '☠ ' : ''}${e.config.name}
+            </span>
             <span style="font-size:11px;color:#bb8888;font-weight:600;">LV ${eLv}</span>
           </div>
           <!-- HP row -->

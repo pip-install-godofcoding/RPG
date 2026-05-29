@@ -82,6 +82,32 @@ export class HUD {
     this.nameText = this.scene.add.text(20, 76, `${window.ASHENVEIL.username} — ${this.player.classConfig.name}`, {
       fontFamily: 'Inter, sans-serif', fontSize: '9px', color: '#888899'
     }).setDepth(102).setScrollFactor(0);
+
+    // Save Game Button
+    const saveBtnBg = this.scene.add.rectangle(1260, 20, 80, 26, 0x1a1a2e, 0.9)
+      .setOrigin(1, 0).setStrokeStyle(1, 0x44aa44, 0.8).setDepth(100).setScrollFactor(0).setInteractive();
+    const saveBtnTxt = this.scene.add.text(1220, 33, '💾 SAVE', {
+      fontFamily: 'Inter, sans-serif', fontSize: '11px', color: '#44ff44', fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(101).setScrollFactor(0);
+
+    saveBtnBg.on('pointerover', () => { saveBtnBg.setFillStyle(0x2a3a2a, 0.9); this.scene.input.setDefaultCursor('pointer'); });
+    saveBtnBg.on('pointerout', () => { saveBtnBg.setFillStyle(0x1a1a2e, 0.9); this.scene.input.setDefaultCursor('default'); });
+    saveBtnBg.on('pointerdown', () => {
+      saveBtnBg.setFillStyle(0x44aa44, 1);
+      saveBtnTxt.setColor('#000000');
+      if (this.scene._saveGame) this.scene._saveGame();
+      
+      // Toast notification
+      const toast = this.scene.add.text(1220, 60, 'Game Saved!', {
+        fontFamily: 'Inter, sans-serif', fontSize: '12px', color: '#44ff44', stroke: '#000', strokeThickness: 2
+      }).setOrigin(0.5).setDepth(200).setScrollFactor(0);
+      this.scene.tweens.add({ targets: toast, y: 50, alpha: 0, duration: 1500, onComplete: () => toast.destroy() });
+
+      setTimeout(() => {
+        saveBtnBg.setFillStyle(0x2a3a2a, 0.9);
+        saveBtnTxt.setColor('#44ff44');
+      }, 150);
+    });
   }
 
   _createDamageNumbers() {
