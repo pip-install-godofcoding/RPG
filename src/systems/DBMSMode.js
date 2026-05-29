@@ -7,18 +7,18 @@ import Phaser from 'phaser';
 // ============================================================
 
 const CONCEPTS = {
-  trigger:     { title: '⚡ TRIGGER',              color: '#ff6644', desc: 'Automatically executes a function BEFORE/AFTER INSERT, UPDATE, or DELETE.\nUsed here: trg_level_up fires when XP changes, auto-leveling the player.' },
-  storedProc:  { title: '📦 STORED PROCEDURE',     color: '#44aaff', desc: 'A reusable server-side function called via SELECT rpc_name().\nKeeps business logic in the DB — clients send intent, server validates.' },
-  join:        { title: '🔗 JOIN',                  color: '#44ff88', desc: 'Combines rows from 2+ tables using a shared key (FK→PK).\nINNER JOIN = only matching rows. LEFT JOIN = all from left + matches.' },
-  normalization:{ title: '📐 NORMALIZATION (3NF)',  color: '#ffaa44', desc: '1NF: No repeating groups. 2NF: No partial dependencies.\n3NF: No transitive dependencies. Each non-key depends ONLY on the PK.' },
-  index:       { title: '🔍 INDEX',                color: '#aa88ff', desc: 'B-tree structure that speeds up WHERE/JOIN lookups.\nTrade-off: faster SELECT, slower INSERT/UPDATE (must update index too).' },
-  rls:         { title: '🔒 ROW LEVEL SECURITY',   color: '#ff4488', desc: 'PostgreSQL policy that restricts rows per user.\nPolicy: USING (auth.uid() = player_id) — you can only see YOUR data.' },
-  transaction: { title: '💎 ACID TRANSACTION',      color: '#ffdd44', desc: 'Atomic: all-or-nothing. Consistent: valid state before & after.\nIsolated: concurrent transactions don\'t interfere. Durable: committed = permanent.' },
-  view:        { title: '👁 VIEW',                  color: '#88ddff', desc: 'A virtual table from a stored SELECT query.\nv_leaderboard = SELECT username, level, xp FROM players ORDER BY level DESC.' },
-  fk:          { title: '🔑 FOREIGN KEY',           color: '#ff8844', desc: 'References a PK in another table → enforces referential integrity.\nON DELETE CASCADE: deleting a player auto-deletes their inventory rows.' },
-  aggregate:   { title: '📊 AGGREGATE FUNCTIONS',   color: '#88ff88', desc: 'COUNT(*), SUM(gold), AVG(level), MAX(xp), MIN(hp).\nUsed with GROUP BY to compute stats per group (per guild, per zone).' },
-  subquery:    { title: '🔄 SUBQUERY',              color: '#dd88ff', desc: 'A SELECT nested inside another SELECT, WHERE, or FROM.\nExample: WHERE attack > (SELECT AVG(attack) FROM items) — find above-average items.' },
-  upsert:      { title: '⬆ UPSERT',                color: '#ffcc44', desc: 'INSERT ... ON CONFLICT (pk) DO UPDATE SET ...\nAtomically creates a new row OR updates existing. Prevents duplicate key errors.' }
+  trigger:     { title: '⚡ TRIGGER',              color: '#ff6644', desc: 'Automatically executes a function BEFORE/AFTER INSERT, UPDATE, or DELETE.\nUsed here: trg_level_up fires when XP changes, auto-leveling the player.', hint: 'Gain enough XP to Level Up.' },
+  storedProc:  { title: '📦 STORED PROCEDURE',     color: '#44aaff', desc: 'A reusable server-side function called via SELECT rpc_name().\nKeeps business logic in the DB — clients send intent, server validates.', hint: 'Use an Ability in combat.' },
+  join:        { title: '🔗 JOIN',                  color: '#44ff88', desc: 'Combines rows from 2+ tables using a shared key (FK→PK).\nINNER JOIN = only matching rows. LEFT JOIN = all from left + matches.', hint: 'Open the Guild or Marketplace menus.' },
+  normalization:{ title: '📐 NORMALIZATION (3NF)',  color: '#ffaa44', desc: '1NF: No repeating groups. 2NF: No partial dependencies.\n3NF: No transitive dependencies. Each non-key depends ONLY on the PK.', hint: 'Open the Marketplace.' },
+  index:       { title: '🔍 INDEX',                color: '#aa88ff', desc: 'B-tree structure that speeds up WHERE/JOIN lookups.\nTrade-off: faster SELECT, slower INSERT/UPDATE (must update index too).', hint: 'Travel between different map zones.' },
+  rls:         { title: '🔒 ROW LEVEL SECURITY',   color: '#ff4488', desc: 'PostgreSQL policy that restricts rows per user.\nPolicy: USING (auth.uid() = player_id) — you can only see YOUR data.', hint: 'Automatically unlocked when starting the game.' },
+  transaction: { title: '💎 ACID TRANSACTION',      color: '#ffdd44', desc: 'Atomic: all-or-nothing. Consistent: valid state before & after.\nIsolated: concurrent transactions don\'t interfere. Durable: committed = permanent.', hint: 'Buy an item in the Shop or Marketplace.' },
+  view:        { title: '👁 VIEW',                  color: '#88ddff', desc: 'A virtual table from a stored SELECT query.\nv_leaderboard = SELECT username, level, xp FROM players ORDER BY level DESC.', hint: 'Check the PvP leaderboard.' },
+  fk:          { title: '🔑 FOREIGN KEY',           color: '#ff8844', desc: 'References a PK in another table → enforces referential integrity.\nON DELETE CASCADE: deleting a player auto-deletes their inventory rows.', hint: 'Acquire or progress a quest.' },
+  aggregate:   { title: '📊 AGGREGATE FUNCTIONS',   color: '#88ff88', desc: 'COUNT(*), SUM(gold), AVG(level), MAX(xp), MIN(hp).\nUsed with GROUP BY to compute stats per group (per guild, per zone).', hint: 'Take damage or heal during gameplay.' },
+  subquery:    { title: '🔄 SUBQUERY',              color: '#dd88ff', desc: 'A SELECT nested inside another SELECT, WHERE, or FROM.\nExample: WHERE attack > (SELECT AVG(attack) FROM items) — find above-average items.', hint: 'Accept a quest or start a PvP challenge.' },
+  upsert:      { title: '⬆ UPSERT',                color: '#ffcc44', desc: 'INSERT ... ON CONFLICT (pk) DO UPDATE SET ...\nAtomically creates a new row OR updates existing. Prevents duplicate key errors.', hint: 'Automatically unlocked by walking around.' }
 };
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../utils/Constants.js';
@@ -492,8 +492,8 @@ export class DBMSMode {
       const seen = this.conceptsSeen.has(key);
       const icon = seen ? '✅' : '🔒';
       const color = seen ? c.color : '#555566';
-      const descColor = seen ? '#cccccc' : '#444455';
-      const desc = seen ? c.desc.replace(/\n/g, '<br>') : '[ Play the game to unlock this concept ]';
+      const descColor = seen ? '#cccccc' : '#555566';
+      const desc = seen ? c.desc.replace(/\n/g, '<br>') : `[ Locked ] <br><span style="color:#4466aa; font-style:italic;">Hint: ${c.hint}</span>`;
       return `
         <div style="margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.05);">
           <div style="font-size:13px; font-weight:800; color:${color}; margin-bottom:6px; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
