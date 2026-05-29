@@ -369,16 +369,6 @@ export class SpriteGenerator {
               g.fillCircle(cx-2, cy-9+b, 1.5); g.fillCircle(cx+2, cy-9+b, 1.5);
               g.fillStyle(e.c, alpha);
               g.fillRect(cx-5, cy+8, 4, 6); g.fillRect(cx+1, cy+8, 4, 6);
-            } else {
-              g.fillRect(cx-10, cy-8+b, 20, 18);
-              g.fillCircle(cx, cy-12+b, 7);
-              g.fillStyle(0xffcc00, alpha);
-              g.fillCircle(cx-3, cy-13+b, 2); g.fillCircle(cx+3, cy-13+b, 2);
-              if (name === 'dragon') {
-                g.fillStyle(0xff4400, 0.6*alpha);
-                g.fillTriangle(cx-14,cy-4, cx-8,cy-12, cx-8,cy);
-                g.fillTriangle(cx+14,cy-4, cx+8,cy-12, cx+8,cy);
-              }
             } else if (e.shape === 'king_blob') {
               // Slime King — big crowned blob
               // Shadow
@@ -466,6 +456,17 @@ export class SpriteGenerator {
               g.fillStyle(0xccddff, alpha);
               g.fillTriangle(cx-7, cy-18+b, cx-4, cy-24+b, cx-1, cy-18+b);
               g.fillTriangle(cx+1, cy-18+b, cx+4, cy-24+b, cx+7, cy-18+b);
+            } else {
+              // 'big' shape: crystal_golem and dragon
+              g.fillRect(cx-10, cy-8+b, 20, 18);
+              g.fillCircle(cx, cy-12+b, 7);
+              g.fillStyle(0xffcc00, alpha);
+              g.fillCircle(cx-3, cy-13+b, 2); g.fillCircle(cx+3, cy-13+b, 2);
+              if (name === 'dragon') {
+                g.fillStyle(0xff4400, 0.6*alpha);
+                g.fillTriangle(cx-14,cy-4, cx-8,cy-12, cx-8,cy);
+                g.fillTriangle(cx+14,cy-4, cx+8,cy-12, cx+8,cy);
+              }
             }
           }
         });

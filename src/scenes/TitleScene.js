@@ -132,13 +132,29 @@ export class TitleScene extends Phaser.Scene {
       // Continue → try load from localStorage
       const saved = localStorage.getItem('ashenveil_save');
       if (saved) {
-        const data = JSON.parse(saved);
-        window.ASHENVEIL.username = data.username;
-        window.ASHENVEIL.playerClass = data.playerClass;
-        this.cameras.main.fadeOut(500, 10, 10, 15);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-          this.scene.start('Game', data);
-        });
+        try {
+          const data = JSON.parse(saved);
+          // Restore globals BEFORE scene starts so GameScene.init() reads correct values
+          window.ASHENVEIL.username    = data.username    || window.ASHENVEIL.username;
+          window.ASHENVEIL.playerClass = data.playerClass || 'warrior';
+          window.ASHENVEIL.guildName   = data.guildName   || null;
+          window.ASHENVEIL.guildTag    = data.guildTag    || null;
+          // Ensure flag is correct so _loadGame() runs
+          data.isNew = false;
+          this.cameras.main.fadeOut(500, 10, 10, 15);
+          this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.scene.start('Game', data);
+          });
+        } catch (e) {
+          console.warn('[CONTINUE] Corrupt save, clearing:', e);
+          localStorage.removeItem('ashenveil_save');
+          this.menuItems[1].setColor('#ff4444');
+          this.menuItems[1].setText('CORRUPT SAVE!');
+          setTimeout(() => {
+            this.menuItems[1].setColor('#333333');
+            this.menuItems[1].setText('CONTINUE');
+          }, 1500);
+        }
       } else {
         // Flash red if no save
         this.menuItems[1].setColor('#ff4444');

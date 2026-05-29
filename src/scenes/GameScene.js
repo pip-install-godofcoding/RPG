@@ -456,19 +456,18 @@ export class GameScene extends Phaser.Scene {
     if (!raw || this.isNewGame) return;
     try {
       const save = JSON.parse(raw);
-      if (save.playerClass === this.playerClass) {
-        this.player.setPosition(save.x, save.y);
-        this.player.level = save.level || 1;
-        this.player.xp = save.xp || 0;
-        this.player.gold = save.gold || 100;
-        if (save.hp) this.player.stats.hp = save.hp;
-        if (save.mana) this.player.stats.mana = save.mana;
-        if (save.maxHp) this.player.stats.maxHp = save.maxHp;
-        this.player.xpToNext = this.player.level * this.player.level * 100;
-        this.fogOfWar.loadExploredData(save.fog);
-        window.ASHENVEIL.guildName = save.guildName || null;
-        window.ASHENVEIL.guildTag  = save.guildTag || null;
-      }
-    } catch (e) { console.warn('Failed to load save', e); }
+      this.player.setPosition(save.x || this.player.x, save.y || this.player.y);
+      this.player.level = save.level || 1;
+      this.player.xp    = save.xp    || 0;
+      this.player.gold  = save.gold  || 100;
+      if (save.hp)     this.player.stats.hp     = save.hp;
+      if (save.mana)   this.player.stats.mana   = save.mana;
+      if (save.maxHp)  this.player.stats.maxHp  = save.maxHp;
+      this.player.xpToNext = this.player.level * this.player.level * 100;
+      this.fogOfWar.loadExploredData(save.fog);
+      window.ASHENVEIL.guildName = save.guildName || null;
+      window.ASHENVEIL.guildTag  = save.guildTag  || null;
+      console.log('[LOAD] Restored save for', save.username, 'at', save.x?.toFixed(0), save.y?.toFixed(0));
+    } catch (e) { console.warn('[LOAD] Failed to load save:', e); }
   }
 }
