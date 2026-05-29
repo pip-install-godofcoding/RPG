@@ -25,6 +25,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.xp = 0;
     this.xpToNext = 40;
     this.gold = 100;
+    this.kills = 0;
+    this.totalDamage = 0;
     this.direction = DIR.DOWN;
     this.isAttacking = false;
     this.isDead = false;

@@ -23,6 +23,7 @@ import { GuildSystem } from '../systems/GuildSystem.js';
 import { PvPSystem } from '../systems/PvPSystem.js';
 import { MobileControls } from '../systems/MobileControls.js';
 import { PauseMenu } from '../systems/PauseMenu.js';
+import { Leaderboard } from '../systems/Leaderboard.js';
 
 export class GameScene extends Phaser.Scene {
   constructor() { super('Game'); }
@@ -107,7 +108,8 @@ export class GameScene extends Phaser.Scene {
     this.guildSystem = new GuildSystem(this, this.player);
     // PvP wired AFTER multiplayer so it can reference the channel
     this.pvp = new PvPSystem(this, this.player, this.multiplayer);
-    this.pauseMenu = new PauseMenu(this);
+    this.pauseMenu  = new PauseMenu(this);
+    this.leaderboard = new Leaderboard(this, this.player);
 
     // Mobile virtual controls (no-op on desktop)
     this.mobileControls = new MobileControls(this);
@@ -117,6 +119,7 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-G', () => this.guildSystem?.show());
     this.input.keyboard.on('keydown-J', () => this.questSystem?.toggleTracker?.());
     this.input.keyboard.on('keydown-P', () => this.pvp?.sendChallenge?.());
+    // [L] is handled inside Leaderboard constructor
 
     // Hide mobile controls whenever BattleScene is active, restore on resume
     this.events.on('pause',  () => this.mobileControls?.hide());
@@ -130,14 +133,17 @@ export class GameScene extends Phaser.Scene {
     // Auto-save timer
     this.time.addEvent({
       delay: 30000,
-      callback: () => this._saveGame(),
+      callback: () => {
+        this._saveGame();
+        this.leaderboard?._pushLocalStats(); // keep Supabase leaderboard fresh
+      },
       loop: true
     });
 
     // Controls help
     const helpStr = window.ASHENVEIL.dbmsMode
-      ? 'WASD: Move | E: Interact | J: Quests | TAB: Schema | C: Concepts | B: Sandbox | M: Shop | G: Guild | P: PvP'
-      : 'WASD/Arrows: Move | Shift: Run | E: Interact | J: Quests | M: Shop | G: Guild | P: PvP Challenge';
+      ? 'WASD: Move | E: Interact | J: Quests | TAB: Schema | C: Concepts | B: Sandbox | M: Shop | G: Guild | L: Leaderboard'
+      : 'WASD/Arrows: Move | Shift: Run | E: Interact | J: Quests | M: Shop | G: Guild | L: Leaderboard | P: PvP';
     this.helpText = this.add.text(640, 710, helpStr, {
       fontFamily: 'Inter', fontSize: '13px', color: '#555566'
     }).setOrigin(0.5).setDepth(102).setScrollFactor(0);
@@ -429,6 +435,8 @@ export class GameScene extends Phaser.Scene {
       level: this.player.level,
       xp: this.player.xp,
       gold: this.player.gold,
+      kills: this.player.kills || 0,
+      totalDamage: this.player.totalDamage || 0,
       hp: this.player.stats.hp,
       mana: this.player.stats.mana,
       maxHp: this.player.stats.maxHp,
@@ -460,6 +468,8 @@ export class GameScene extends Phaser.Scene {
       this.player.level = save.level || 1;
       this.player.xp    = save.xp    || 0;
       this.player.gold  = save.gold  || 100;
+      this.player.kills       = save.kills       || 0;
+      this.player.totalDamage = save.totalDamage || 0;
       if (save.hp)     this.player.stats.hp     = save.hp;
       if (save.mana)   this.player.stats.mana   = save.mana;
       if (save.maxHp)  this.player.stats.maxHp  = save.maxHp;

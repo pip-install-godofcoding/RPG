@@ -575,7 +575,10 @@ export class BattleScene extends Phaser.Scene {
         const rawDmg = ab.damage > 0 ? ab.damage + p.attack : 0;
         const dmg    = rawDmg;
         this.enemy.hp -= dmg;
-        if (dmg > 0) this._showDamage(this.enemySprite.x, this.enemySprite.y - 40, dmg, false);
+        if (dmg > 0) {
+          this._showDamage(this.enemySprite.x, this.enemySprite.y - 40, dmg, false);
+          this.player.totalDamage = (this.player.totalDamage || 0) + dmg;
+        }
         this._logDBMS(`UPDATE enemies SET hp = ${Math.max(0, this.enemy.hp)} WHERE name = '${this.enemy.config.name}';`);
         this._updateBars();
 
@@ -629,6 +632,8 @@ export class BattleScene extends Phaser.Scene {
 
   _victory() {
     this.state = 'END';
+    // Track kill + damage stats for leaderboard
+    this.player.kills = (this.player.kills || 0) + 1;
     const gold = Phaser.Math.Between(this.enemy.config.goldMin, this.enemy.config.goldMax);
     this._msg(`<span style="color:#ffdd44">🏆 Victory! +${this.enemy.config.xp} XP · +${gold} Gold</span>`);
     this._logDBMS(`UPDATE players SET xp = xp + ${this.enemy.config.xp}, gold = gold + ${gold} WHERE username = '${window.ASHENVEIL?.username}';`);
