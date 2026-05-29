@@ -35,8 +35,11 @@ export class GameScene extends Phaser.Scene {
   create() {
     // Audio
     this.audio = new AudioSystem();
-    // Init on first click
-    this.input.once('pointerdown', () => this.audio.init());
+    // Init on first click (Web Audio API requirement)
+    this.input.once('pointerdown', () => {
+      this.audio.init();
+      this.audio.startBGM();
+    });
 
     // World bounds
     this.physics.world.setBounds(0, 0, WORLD_PX_W, WORLD_PX_H);
